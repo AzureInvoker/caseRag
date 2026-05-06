@@ -151,9 +151,27 @@ def _mcp_handle(name: str, args: dict) -> dict:
         return {"content": [{"type": "text", "text": f"未知工具: {name}"}]}
 
 
+def _normalize_args(raw) -> dict:
+    """归一化 MCP arguments 参数，兼容部分客户端误传 list"""
+    if raw is None:
+        return {}
+    if isinstance(raw, dict):
+        return raw
+    if isinstance(raw, list) and len(raw) == 1 and isinstance(raw[0], dict):
+        return raw[0]
+    # 打印日志便于定位问题
+    import logging
+    logging.getLogger("mcp").warning(f"invalid arguments type: {type(raw).__name__}, value: {raw}")
+    return {}
+
+
 def _mcp_handle_tc_add(args: dict) -> dict:
     """处理 tc_add：添加测试用例"""
     from datetime import datetime
+
+    # 兜底校验：兼容 list 误传
+    if not isinstance(args, dict):
+        return {"content": [{"type": "text", "text": "❌ 参数格式错误：tc_add 的 arguments 必须为对象"}]}
     title = args.get("title", "").strip()
     if not title:
         return {"content": [{"type": "text", "text": "❌ 标题不能为空"}]}
@@ -369,7 +387,7 @@ async def mcp_message(msg: MCPMessage, request: Request, session_id: str = Query
     # 如果是 tools/call
     if method == "tools/call":
         tool_name = msg.params.get("name", "")
-        tool_args = msg.params.get("arguments", {})
+        tool_args = _normalize_args(msg.params.get("arguments", {}))
 
         # tc_add 走专用处理函数（需要 operator 类参数校验）
         if tool_name == "tc_add":

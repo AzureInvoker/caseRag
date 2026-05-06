@@ -151,6 +151,46 @@ def _mcp_handle(name: str, args: dict) -> dict:
         return {"content": [{"type": "text", "text": f"未知工具: {name}"}]}
 
 
+def _mcp_handle_tc_add(args: dict) -> dict:
+    """处理 tc_add：添加测试用例"""
+    from datetime import datetime
+    title = args.get("title", "").strip()
+    if not title:
+        return {"content": [{"type": "text", "text": "❌ 标题不能为空"}]}
+    module = args.get("module", "").strip()
+    if not module:
+        return {"content": [{"type": "text", "text": "❌ 模块名不能为空"}]}
+    tc = TestCase(
+        title=title,
+        module=module,
+        priority=args.get("priority", "P3"),
+        category=args.get("category", "功能测试"),
+        preconditions=args.get("preconditions", ""),
+        steps=args.get("steps", []),
+        expected=args.get("expected", ""),
+        tags=args.get("tags", []),
+        project=args.get("project", ""),
+        creator=args.get("creator", "MCP"),
+        created_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    )
+    tc.id = tc.gen_id()
+    engine.add(tc)
+    text = (
+        f"✅ 测试用例已添加\n\n"
+        f"| 字段 | 值 |\n"
+        f"|------|-----|\n"
+        f"| ID | `{tc.id}` |\n"
+        f"| 标题 | {tc.title} |\n"
+        f"| 模块 | {tc.module} |\n"
+        f"| 优先级 | {tc.priority} |\n"
+        f"| 类别 | {tc.category} |\n"
+    )
+    if tc.tags:
+        text += f"| 标签 | {', '.join(tc.tags)} |\n"
+    text += f"\n可以使用 `tc_get` 传入 ID `{tc.id}` 查看详情"
+    return {"content": [{"type": "text", "text": text}]}
+
+
 # ── MCP 工具 Schema ──
 
 MCP_TOOLS = [
@@ -196,6 +236,25 @@ MCP_TOOLS = [
         "name": "tc_stats",
         "description": "获取知识库统计信息（总数、模块分布、优先级分布）",
         "inputSchema": {"type": "object", "properties": {}},
+    },
+    {
+        "name": "tc_add",
+        "description": "添加一条新的测试用例到知识库（自动向量化索引）",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "title": {"type": "string", "description": "用例标题"},
+                "module": {"type": "string", "description": "模块名（如：登录/支付/搜索/权限）"},
+                "priority": {"type": "string", "description": "优先级 P0/P1/P2/P3（默认 P3）"},
+                "category": {"type": "string", "description": "类别：功能测试/性能测试/安全测试/回归测试"},
+                "preconditions": {"type": "string", "description": "前置条件"},
+                "steps": {"type": "array", "items": {"type": "string"}, "description": "测试步骤列表"},
+                "expected": {"type": "string", "description": "预期结果"},
+                "tags": {"type": "array", "items": {"type": "string"}, "description": "标签列表"},
+                "project": {"type": "string", "description": "所属项目"},
+            },
+            "required": ["title", "module"],
+        },
     },
 ]
 
@@ -311,7 +370,13 @@ async def mcp_message(msg: MCPMessage, request: Request, session_id: str = Query
     if method == "tools/call":
         tool_name = msg.params.get("name", "")
         tool_args = msg.params.get("arguments", {})
-        result = _mcp_handle(tool_name, tool_args)
+
+        # tc_add 走专用处理函数（需要 operator 类参数校验）
+        if tool_name == "tc_add":
+            result = _mcp_handle_tc_add(tool_args)
+        else:
+            result = _mcp_handle(tool_name, tool_args)
+
         resp = {"jsonrpc": "2.0", "id": msg_id, "result": result}
 
         # 如果有 SSE session，通过 SSE 推回

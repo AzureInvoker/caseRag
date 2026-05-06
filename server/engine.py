@@ -8,11 +8,13 @@ from pathlib import Path
 from dataclasses import dataclass, field, asdict
 from typing import Optional
 
-# ── 配置 ──
+from .config import get_config
+
+cfg = get_config()
 
 DATA_DIR = Path(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-CHROMA_DIR = DATA_DIR / ".chroma_db"
-EMBED_MODEL = "all-MiniLM-L6-v2"
+CHROMA_DIR = cfg.chroma_dir
+EMBED_MODEL = cfg.embed_model
 
 # ── 数据模型 ──
 

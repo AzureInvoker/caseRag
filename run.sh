@@ -1,20 +1,36 @@
 #!/bin/bash
 # 测试用例知识库 — 管理脚本
+# 配置优先级: 环境变量 > config.yaml > 默认值
 set -e
 
 cd "$(dirname "$0")"
 
+# ── 加载配置 ──
+
+# 尝试从 config.yaml 读取
+if [ -f config.yaml ]; then
+  _host=$(python3 -c "import yaml; c=yaml.safe_load(open('config.yaml')); print(c.get('api',{}).get('host',''))" 2>/dev/null)
+  _port=$(python3 -c "import yaml; c=yaml.safe_load(open('config.yaml')); print(c.get('api',{}).get('port',''))" 2>/dev/null)
+fi
+
+# 环境变量覆盖
+API_HOST="${TC_API_HOST:-${_host:-0.0.0.0}}"
+API_PORT="${TC_API_PORT:-${_port:-8765}}"
+
+# ── 命令分发 ──
+
 case "${1:-help}" in
   api)
-    echo "🚀 启动 REST API (端口 8765)..."
-    echo "   Swagger: http://localhost:8765/docs"
-    exec uvicorn server.api:app --host 0.0.0.0 --port 8765 --reload
+    echo "🚀 启动 REST API (${API_HOST}:${API_PORT})..."
+    echo "   Swagger: http://localhost:${API_PORT}/docs"
+    exec uvicorn server.api:app --host "${API_HOST}" --port "${API_PORT}" --reload
     ;;
   api:bg)
-    echo "🚀 后台启动 REST API (端口 8765)..."
-    nohup uvicorn server.api:app --host 0.0.0.0 --port 8765 > /tmp/testcase-rag-api.log 2>&1 &
+    echo "🚀 后台启动 REST API (${API_HOST}:${API_PORT})..."
+    nohup uvicorn server.api:app --host "${API_HOST}" --port "${API_PORT}" > /tmp/testcase-rag-api.log 2>&1 &
     echo "  PID: $!"
     echo "  日志: /tmp/testcase-rag-api.log"
+    echo "  API: http://${API_HOST}:${API_PORT}"
     ;;
   mcp)
     echo "🧩 启动 MCP Server (stdio)..."
@@ -53,14 +69,13 @@ print('✅ MCP 测试通过')
     ;;
   api:test)
     echo "🧪 测试 REST API..."
-    # 先确保 API 在跑
-    if ! curl -sf http://localhost:8765/api/v1/health >/dev/null 2>&1; then
+    if ! curl -sf "http://${API_HOST}:${API_PORT}/api/v1/health" >/dev/null 2>&1; then
       echo "⚠️  API 未运行，请先执行 ./run.sh api:bg"
       exit 1
     fi
-    echo "✅ Health: $(curl -s http://localhost:8765/api/v1/health)"
+    echo "✅ Health: $(curl -s "http://${API_HOST}:${API_PORT}/api/v1/health")"
     echo "---"
-    echo "✅ Stats: $(curl -s http://localhost:8765/api/v1/stats)"
+    echo "✅ Stats: $(curl -s "http://${API_HOST}:${API_PORT}/api/v1/stats")"
     ;;
   seed)
     echo "🌱 填充示例测试用例..."
@@ -74,15 +89,15 @@ print('✅ MCP 测试通过')
     echo "🔬 全链路演示..."
     echo ""
     echo "--- 1. Health Check ---"
-    curl -s http://localhost:8765/api/v1/health | python3 -m json.tool
+    curl -s "http://${API_HOST}:${API_PORT}/api/v1/health" | python3 -m json.tool
     echo ""
     echo "--- 2. 搜索 ---"
-    curl -s -X POST http://localhost:8765/api/v1/search \
+    curl -s -X POST "http://${API_HOST}:${API_PORT}/api/v1/search" \
       -H "Content-Type: application/json" \
       -d '{"query":"登录失败怎么办","n_results":3}' | python3 -c "import sys,json; d=json.load(sys.stdin); print(f'共 {d[\"total\"]} 条结果:'); [print(f'  [{r[\"score\"]:.2f}] {r[\"title\"]} ({r[\"module\"]})') for r in d['results']]"
     echo ""
     echo "--- 3. Stats ---"
-    curl -s http://localhost:8765/api/v1/stats | python3 -m json.tool
+    curl -s "http://${API_HOST}:${API_PORT}/api/v1/stats" | python3 -m json.tool
     ;;
   *)
     echo "测试用例知识库 - 管理脚本"
@@ -102,5 +117,9 @@ print('✅ MCP 测试通过')
     echo "  api:test   测试 API"
     echo "  mcp:test   测试 MCP"
     echo "  demo       全链路演示"
+    echo ""
+    echo "配置:"
+    echo "  环境变量: TC_API_HOST, TC_API_PORT, TC_EMBED_MODEL, TC_CHROMA_DIR"
+    echo "  配置文件: config.yaml (参考 config.example.yaml)"
     ;;
 esac

@@ -3,7 +3,11 @@ REST API — 测试用例知识库
 
 启动:
   cd /home/admin/testcase-rag
-  uvicorn server.api:app --host 0.0.0.0 --port 8765
+  uvicorn server.api:app --host $TC_API_HOST --port $TC_API_PORT
+
+配置优先级: 环境变量 > config.yaml > 默认值
+  TC_API_HOST=0.0.0.0
+  TC_API_PORT=8765
 
 端点:
   POST   /api/v1/cases          — 添加单条用例

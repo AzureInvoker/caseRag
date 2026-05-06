@@ -1,6 +1,9 @@
 # 向量数据库
 .chroma_db/
 
+# 配置文件（每台机器自定义）
+config.yaml
+
 # Python
 __pycache__/
 *.py[cod]

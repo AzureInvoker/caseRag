@@ -1,5 +1,5 @@
 """
-REST API + HTTP MCP — 测试用例知识库
+测试用例知识库 — MCP + REST API
 
 启动:
   cd /home/admin/testcase-rag
@@ -9,26 +9,16 @@ REST API + HTTP MCP — 测试用例知识库
   TC_API_HOST=0.0.0.0
   TC_API_PORT=8765
 
-端点:
-  REST API:
-    POST   /api/v1/cases            — 添加单条用例
-    POST   /api/v1/cases/batch      — 批量添加
-    GET    /api/v1/cases            — 列表/筛选/分页
-    POST   /api/v1/search           — 语义搜索
-    GET    /api/v1/stats            — 统计信息
-    ...
-
-  MCP (HTTP/SSE):
-    GET    /mcp                     — SSE 端点（MCP 客户端连接用）
-    POST   /mcp                     — 消息端点（MCP 客户端发送请求）
-
-  MCP 发现端点:
-    GET    /mcp/info                — MCP 服务信息
-    GET    /mcp/sse                 — SSE 流端点（MCP 标准协议）
+MCP 写入工具使用说明:
+  tc_add / tc_add_batch — 添加测试用例
+  所有字符串字段会自动清洗（去换行、去首尾空白、过滤空值）
+  project 字段为可选项，若留空则默认取 module 值
+  steps 和 tags 中空字符串会被自动过滤
 """
 
 import json
 import asyncio
+import re
 from datetime import datetime
 
 from fastapi import FastAPI, HTTPException, Query, Request
@@ -55,6 +45,57 @@ app.add_middleware(
 )
 
 engine = get_engine()
+
+# ── 输入清洗 ──
+
+def _clean_text(s: str) -> str:
+    """清洗单行文本：去换行、去首尾空白、合并连续空白"""
+    if not isinstance(s, str):
+        return ""
+    s = s.replace("\\n", " ").replace("\\r", " ")
+    s = re.sub(r"\s+", " ", s)
+    return s.strip()
+
+
+def _clean_list(items: list) -> list:
+    """清洗列表：过滤空、去换行、trim"""
+    if not isinstance(items, list):
+        return []
+    cleaned = []
+    for i in items:
+        if isinstance(i, str):
+            c = _clean_text(i)
+            if c:
+                cleaned.append(c)
+    return cleaned
+
+
+def _make_tc(args: dict) -> "TestCase":
+    """从参数字典构造 TestCase，自动清洗所有字段"""
+    title = _clean_text(args.get("title", ""))
+    module = _clean_text(args.get("module", ""))
+    if not title:
+        raise ValueError("标题不能为空")
+    if not module:
+        raise ValueError("模块名不能为空")
+
+    project = _clean_text(args.get("project", ""))
+    if not project:
+        project = module  # project 默认取 module
+
+    return TestCase(
+        title=title,
+        module=module,
+        project=project,
+        priority=_clean_text(args.get("priority", "P3")) or "P3",
+        category=_clean_text(args.get("category", "功能测试")) or "功能测试",
+        preconditions=_clean_text(args.get("preconditions", "")),
+        steps=_clean_list(args.get("steps", [])),
+        expected=_clean_text(args.get("expected", "")),
+        tags=_clean_list(args.get("tags", [])),
+        creator=_clean_text(args.get("creator", "MCP")) or "MCP",
+        created_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    )
 
 # ── MCP 会话管理 ──
 
@@ -166,47 +207,74 @@ def _normalize_args(raw) -> dict:
 
 
 def _mcp_handle_tc_add(args: dict) -> dict:
-    """处理 tc_add：添加测试用例"""
-    from datetime import datetime
-
-    # 兜底校验：兼容 list 误传
-    if not isinstance(args, dict):
-        return {"content": [{"type": "text", "text": "❌ 参数格式错误：tc_add 的 arguments 必须为对象"}]}
-    title = args.get("title", "").strip()
-    if not title:
-        return {"content": [{"type": "text", "text": "❌ 标题不能为空"}]}
-    module = args.get("module", "").strip()
-    if not module:
-        return {"content": [{"type": "text", "text": "❌ 模块名不能为空"}]}
-    tc = TestCase(
-        title=title,
-        module=module,
-        priority=args.get("priority", "P3"),
-        category=args.get("category", "功能测试"),
-        preconditions=args.get("preconditions", ""),
-        steps=args.get("steps", []),
-        expected=args.get("expected", ""),
-        tags=args.get("tags", []),
-        project=args.get("project", ""),
-        creator=args.get("creator", "MCP"),
-        created_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-    )
+    """处理 tc_add：添加单条测试用例（自动清洗）"""
+    try:
+        tc = _make_tc(args)
+    except ValueError as e:
+        return {"content": [{"type": "text", "text": f"❌ {e}"}]}
     tc.id = tc.gen_id()
     engine.add(tc)
-    text = (
-        f"✅ 测试用例已添加\n\n"
-        f"| 字段 | 值 |\n"
-        f"|------|-----|\n"
-        f"| ID | `{tc.id}` |\n"
-        f"| 标题 | {tc.title} |\n"
-        f"| 模块 | {tc.module} |\n"
-        f"| 优先级 | {tc.priority} |\n"
-        f"| 类别 | {tc.category} |\n"
-    )
-    if tc.tags:
-        text += f"| 标签 | {', '.join(tc.tags)} |\n"
-    text += f"\n可以使用 `tc_get` 传入 ID `{tc.id}` 查看详情"
-    return {"content": [{"type": "text", "text": text}]}
+    return {
+        "content": [{
+            "type": "text",
+            "text": (
+                f"✅ 测试用例已添加\n\n"
+                f"| 字段 | 值 |\n"
+                f"|------|-----|\n"
+                f"| ID | `{tc.id}` |\n"
+                f"| 标题 | {tc.title} |\n"
+                f"| 模块 | {tc.module} |\n"
+                f"| 项目 | {tc.project} |\n"
+                f"| 优先级 | {tc.priority} |\n"
+                f"| 类别 | {tc.category} |\n"
+                + (f"| 步骤 | {len(tc.steps)} 条 |\n" if tc.steps else "")
+                + (f"| 标签 | {', '.join(tc.tags)} |\n" if tc.tags else "")
+                + f"\n可用 `tc_get` 传入 ID `{tc.id}` 查看详情"
+            ),
+        }]
+    }
+
+
+def _mcp_handle_tc_add_batch(args: dict) -> dict:
+    """处理 tc_add_batch：批量添加测试用例（自动清洗每条）"""
+    raw_cases = args.get("cases", [])
+    if not isinstance(raw_cases, list) or not raw_cases:
+        return {"content": [{"type": "text", "text": "❌ cases 必须是数组，且至少包含一条用例"}]}
+
+    added = []
+    errors = []
+    for i, c in enumerate(raw_cases):
+        try:
+            if not isinstance(c, dict):
+                errors.append(f"第 {i+1} 条：参数格式错误（非对象）")
+                continue
+            tc = _make_tc(c)
+            tc.id = tc.gen_id()
+            engine.add(tc)
+            added.append(tc)
+        except ValueError as e:
+            errors.append(f"第 {i+1} 条：{e}")
+
+    summary = f"✅ 成功添加 {len(added)} 条"
+    if errors:
+        summary += f"，{len(errors)} 条失败:\n" + "\n".join(errors)
+
+    # 按 module 分组展示
+    if added:
+        from collections import Counter
+        mods = Counter(tc.module for tc in added)
+        summary += "\n\n**按模块分布:**\n"
+        for mod, count in mods.most_common():
+            summary += f"- {mod}: {count} 条\n"
+
+    # 列出前几条 ID
+    summary += "\n**新增用例 ID:**\n"
+    for tc in added[:10]:
+        summary += f"- `{tc.id}` — {tc.title}\n"
+    if len(added) > 10:
+        summary += f"  ... 还有 {len(added) - 10} 条\n"
+
+    return {"content": [{"type": "text", "text": summary}]}
 
 
 # ── MCP 工具 Schema ──
@@ -257,21 +325,52 @@ MCP_TOOLS = [
     },
     {
         "name": "tc_add",
-        "description": "添加一条新的测试用例到知识库（自动向量化索引）",
+        "description": "添加一条新的测试用例到知识库（自动清洗输入：去换行、trim、过滤空元素）。注意：project 为可选项，留空则自动取 module 值",
         "inputSchema": {
             "type": "object",
             "properties": {
-                "title": {"type": "string", "description": "用例标题"},
-                "module": {"type": "string", "description": "模块名（如：登录/支付/搜索/权限）"},
+                "title": {"type": "string", "description": "用例标题（必填）"},
+                "module": {"type": "string", "description": "模块名，如：登录/支付/搜索/音效/转盘/UI（必填）"},
                 "priority": {"type": "string", "description": "优先级 P0/P1/P2/P3（默认 P3）"},
-                "category": {"type": "string", "description": "类别：功能测试/性能测试/安全测试/回归测试"},
+                "category": {"type": "string", "description": "类别：功能测试/性能测试/安全测试/回归测试（默认 功能测试）"},
                 "preconditions": {"type": "string", "description": "前置条件"},
-                "steps": {"type": "array", "items": {"type": "string"}, "description": "测试步骤列表"},
+                "steps": {"type": "array", "items": {"type": "string"}, "description": "测试步骤列表（自动过滤空行和换行符）"},
                 "expected": {"type": "string", "description": "预期结果"},
-                "tags": {"type": "array", "items": {"type": "string"}, "description": "标签列表"},
-                "project": {"type": "string", "description": "所属项目"},
+                "tags": {"type": "array", "items": {"type": "string"}, "description": "标签列表（自动过滤空元素）"},
+                "project": {"type": "string", "description": "所属项目（可选项，留空则默认取 module 值）"},
+                "creator": {"type": "string", "description": "创建人（默认 MCP）"},
             },
             "required": ["title", "module"],
+        },
+    },
+    {
+        "name": "tc_add_batch",
+        "description": "批量添加测试用例（自动清洗每条输入）。传入 cases 数组，每条结构和 tc_add 一致",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "cases": {
+                    "type": "array",
+                    "description": "用例数组，每条包含 title, module（必填）及可选字段",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "title": {"type": "string", "description": "用例标题（必填）"},
+                            "module": {"type": "string", "description": "模块名（必填）"},
+                            "priority": {"type": "string", "description": "优先级 P0-P3"},
+                            "category": {"type": "string", "description": "类别"},
+                            "preconditions": {"type": "string", "description": "前置条件"},
+                            "steps": {"type": "array", "items": {"type": "string"}, "description": "测试步骤"},
+                            "expected": {"type": "string", "description": "预期结果"},
+                            "tags": {"type": "array", "items": {"type": "string"}, "description": "标签"},
+                            "project": {"type": "string", "description": "所属项目（可选项）"},
+                            "creator": {"type": "string", "description": "创建人"},
+                        },
+                        "required": ["title", "module"],
+                    },
+                }
+            },
+            "required": ["cases"],
         },
     },
 ]
@@ -389,9 +488,11 @@ async def mcp_message(msg: MCPMessage, request: Request, session_id: str = Query
         tool_name = msg.params.get("name", "")
         tool_args = _normalize_args(msg.params.get("arguments", {}))
 
-        # tc_add 走专用处理函数（需要 operator 类参数校验）
+        # tc_add / tc_add_batch 走专用处理函数
         if tool_name == "tc_add":
             result = _mcp_handle_tc_add(tool_args)
+        elif tool_name == "tc_add_batch":
+            result = _mcp_handle_tc_add_batch(tool_args)
         else:
             result = _mcp_handle(tool_name, tool_args)
 

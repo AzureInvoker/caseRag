@@ -16,10 +16,14 @@
 import json
 import sys
 import os
+import re
 from pathlib import Path
+from datetime import datetime
+from collections import Counter
 
 # 将项目根目录添加到 sys.path
 sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent / "server"))
 
 # 直接从目录 import（避免包名冲突）
 import importlib.util
@@ -32,6 +36,49 @@ spec.loader.exec_module(engine_mod)
 
 TestCase = engine_mod.TestCase
 get_engine = engine_mod.get_engine
+
+# ── 输入清洗 ──
+
+
+def _clean_text(s: str) -> str:
+    if not isinstance(s, str):
+        return ""
+    s = s.replace("\\n", " ").replace("\\r", " ")
+    s = re.sub(r"\s+", " ", s)
+    return s.strip()
+
+
+def _clean_list(items: list) -> list:
+    if not isinstance(items, list):
+        return []
+    return [_clean_text(i) for i in items if isinstance(i, str) and _clean_text(i)]
+
+
+def _make_tc(args: dict) -> "TestCase":
+    from datetime import datetime
+    title = _clean_text(args.get("title", ""))
+    module = _clean_text(args.get("module", ""))
+    if not title:
+        raise ValueError("标题不能为空")
+    if not module:
+        raise ValueError("模块名不能为空")
+    project = _clean_text(args.get("project", ""))
+    if not project:
+        project = module
+    return TestCase(
+        title=title,
+        module=module,
+        project=project,
+        priority=_clean_text(args.get("priority", "P3")) or "P3",
+        category=_clean_text(args.get("category", "功能测试")) or "功能测试",
+        preconditions=_clean_text(args.get("preconditions", "")),
+        steps=_clean_list(args.get("steps", [])),
+        expected=_clean_text(args.get("expected", "")),
+        tags=_clean_list(args.get("tags", [])),
+        creator=_clean_text(args.get("creator", "MCP")) or "MCP",
+        created_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    )
+
 
 engine = get_engine()
 
@@ -102,6 +149,56 @@ TOOLS = [
             "type": "object",
             "properties": {},
             "required": [],
+        },
+    },
+    {
+        "name": "tc_add",
+        "description": "添加单条测试用例（自动清洗输入：去换行、trim、过滤空元素）。注意：project 为可选项，留空则自动取 module 值",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "title": {"type": "string", "description": "用例标题（必填）"},
+                "module": {"type": "string", "description": "模块名，如 音效/转盘/UI/榜单/主页（必填）"},
+                "priority": {"type": "string", "description": "优先级 P0/P1/P2/P3（默认 P3）"},
+                "category": {"type": "string", "description": "类别（默认 功能测试）"},
+                "preconditions": {"type": "string", "description": "前置条件"},
+                "steps": {"type": "array", "items": {"type": "string"}, "description": "测试步骤列表（自动过滤空行）"},
+                "expected": {"type": "string", "description": "预期结果"},
+                "tags": {"type": "array", "items": {"type": "string"}, "description": "标签列表"},
+                "project": {"type": "string", "description": "所属项目（可选项，留空默认取 module）"},
+                "creator": {"type": "string", "description": "创建人（默认 MCP）"},
+            },
+            "required": ["title", "module"],
+        },
+    },
+    {
+        "name": "tc_add_batch",
+        "description": "批量添加测试用例（自动清洗每条）。传入 cases 数组，每条结构和 tc_add 一致",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "cases": {
+                    "type": "array",
+                    "description": "用例数组，每条必填 title, module",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "title": {"type": "string", "description": "用例标题（必填）"},
+                            "module": {"type": "string", "description": "模块名（必填）"},
+                            "priority": {"type": "string", "description": "优先级"},
+                            "category": {"type": "string", "description": "类别"},
+                            "preconditions": {"type": "string", "description": "前置条件"},
+                            "steps": {"type": "array", "items": {"type": "string"}, "description": "测试步骤"},
+                            "expected": {"type": "string", "description": "预期结果"},
+                            "tags": {"type": "array", "items": {"type": "string"}, "description": "标签"},
+                            "project": {"type": "string", "description": "所属项目"},
+                            "creator": {"type": "string", "description": "创建人"},
+                        },
+                        "required": ["title", "module"],
+                    },
+                }
+            },
+            "required": ["cases"],
         },
     },
 ]
@@ -232,6 +329,65 @@ def handle_tool(name: str, args: dict) -> dict:
             for c, count in sorted(stats_data["categories"].items(), key=lambda x: -x[1]):
                 text += f"- {c}: {count} 条\n"
         return {"content": [{"type": "text", "text": text.strip()}]}
+
+    elif name == "tc_add":
+        try:
+            tc = _make_tc(args)
+        except ValueError as e:
+            return {"content": [{"type": "text", "text": f"❌ {e}"}]}
+        tc.id = tc.gen_id()
+        engine.add(tc)
+        return {
+            "content": [{
+                "type": "text",
+                "text": (
+                    f"✅ 测试用例已添加\n\n"
+                    f"| 字段 | 值 |\n"
+                    f"|------|-----|\n"
+                    f"| ID | `{tc.id}` |\n"
+                    f"| 标题 | {tc.title} |\n"
+                    f"| 模块 | {tc.module} |\n"
+                    f"| 项目 | {tc.project} |\n"
+                    f"| 优先级 | {tc.priority} |\n"
+                    f"| 类别 | {tc.category} |\n"
+                    + (f"| 步骤 | {len(tc.steps)} 条 |\n" if tc.steps else "")
+                    + (f"| 标签 | {', '.join(tc.tags)} |\n" if tc.tags else "")
+                    + f"\n可用 tc_get 传入 ID `{tc.id}` 查看详情"
+                ),
+            }]
+        }
+
+    elif name == "tc_add_batch":
+        raw_cases = args.get("cases", [])
+        if not isinstance(raw_cases, list) or not raw_cases:
+            return {"content": [{"type": "text", "text": "❌ cases 必须是数组，且至少包含一条用例"}]}
+        added = []
+        errors = []
+        for i, c in enumerate(raw_cases):
+            try:
+                if not isinstance(c, dict):
+                    errors.append(f"第 {i+1} 条：参数格式错误")
+                    continue
+                tc = _make_tc(c)
+                tc.id = tc.gen_id()
+                engine.add(tc)
+                added.append(tc)
+            except ValueError as e:
+                errors.append(f"第 {i+1} 条：{e}")
+        summary = f"✅ 成功添加 {len(added)} 条"
+        if errors:
+            summary += f"，{len(errors)} 条失败:\n" + "\n".join(errors)
+        if added:
+            mods = Counter(tc.module for tc in added)
+            summary += "\n\n**按模块分布:**\n"
+            for mod, count in mods.most_common():
+                summary += f"- {mod}: {count} 条\n"
+            summary += "\n**新增用例 ID:**\n"
+            for tc in added[:10]:
+                summary += f"- `{tc.id}` — {tc.title}\n"
+            if len(added) > 10:
+                summary += f"  ... 还有 {len(added) - 10} 条\n"
+        return {"content": [{"type": "text", "text": summary}]}
 
     else:
         return {"content": [{"type": "text", "text": f"未知工具: {name}"}]}

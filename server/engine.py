@@ -8,7 +8,10 @@ from pathlib import Path
 from dataclasses import dataclass, field, asdict
 from typing import Optional
 
-from .config import get_config
+try:
+    from .config import get_config
+except ImportError:
+    from config import get_config
 
 cfg = get_config()
 

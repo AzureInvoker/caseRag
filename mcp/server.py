@@ -208,30 +208,48 @@ TOOLS = [
 
 
 def send_json(obj: dict):
+    """发送 JSON-RPC 消息（用 buffer.write 绕过编码问题，确保中文不变成 ????）"""
     msg = json.dumps(obj, ensure_ascii=False)
-    sys.stdout.write(f"Content-Length: {len(msg.encode('utf-8'))}\r\n\r\n{msg}")
-    sys.stdout.flush()
+    raw = f"Content-Length: {len(msg.encode('utf-8'))}\\r\\n\\r\\n{msg}".encode("utf-8")
+    sys.stdout.buffer.write(raw)
+    sys.stdout.buffer.flush()
 
 
 def read_json() -> dict | None:
-    line = sys.stdin.readline()
-    if not line:
+    """
+    读取并解析 MCP JSON-RPC 消息。
+    用 buffer 按字节读取，避免 text-mode 下 read(n) 读的是字符而非字节的问题。
+    """
+    # 读原始字节，自行解析 Content-Length 头
+    buf = sys.stdin.buffer
+
+    # 读取头部直到空行
+    headers = b""
+    while True:
+        chunk = buf.readline()
+        if not chunk:
+            return None  # EOF
+        headers += chunk
+        if chunk in (b"\r\n", b"\n", b"\r"):
+            break
+
+    # 解析 Content-Length
+    length = 0
+    for header_line in headers.split(b"\r\n"):
+        header_line = header_line.strip()
+        if header_line.lower().startswith(b"content-length:"):
+            length = int(header_line.split(b":")[1].strip())
+            break
+
+    if length <= 0:
         return None
-    line = line.strip()
-    if not line.startswith("Content-Length:"):
-        while line and line.strip():
-            line = sys.stdin.readline().strip()
-        line = sys.stdin.readline().strip()
-        if not line:
-            return None
-        length = int(line.split(":")[1].strip()) if ":" in line else int(line)
-    else:
-        length = int(line.split(":")[1].strip())
-        while True:
-            l = sys.stdin.readline()
-            if l in ("\r\n", "\n"):
-                break
-    raw = sys.stdin.read(length)
+
+    # 按字节精确读取 body
+    raw_bytes = buf.read(length)
+    if not raw_bytes:
+        return None
+
+    raw = raw_bytes.decode("utf-8")
     return json.loads(raw) if raw else None
 
 

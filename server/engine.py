@@ -35,7 +35,7 @@ class TestCase:
     steps: list = field(default_factory=list)   # 测试步骤
     expected: str = ""                 # 预期结果
     tags: list = field(default_factory=list)    # 标签
-    project: str = ""                  # 所属项目
+    project: str = ""                  # 项目类型 (如: slot游戏、后台、活动)
     creator: str = ""                  # 创建人
     created_at: str = ""               # 创建时间
 

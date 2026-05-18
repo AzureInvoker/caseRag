@@ -63,8 +63,6 @@ def _make_tc(args: dict) -> "TestCase":
     if not module:
         raise ValueError("模块名不能为空")
     project = _clean_text(args.get("project", ""))
-    if not project:
-        project = module
     return TestCase(
         title=title,
         module=module,
@@ -153,46 +151,46 @@ TOOLS = [
     },
     {
         "name": "tc_add",
-        "description": "添加单条测试用例（自动清洗输入：去换行、trim、过滤空元素）。注意：project 为可选项，留空则自动取 module 值",
+        "description": "添加单条测试用例。自动清洗规则：标题/模块必填且非空；project 为项目类型（如 slot游戏/后台/活动），空则留空；优先级默认为 P3；类别默认为 功能测试；创建人默认 MCP；steps/tags 中空元素自动过滤；所有文本 trim 首尾并合并多余空白/换行；非字符串字段降级为空串",
         "inputSchema": {
             "type": "object",
             "properties": {
-                "title": {"type": "string", "description": "用例标题（必填）"},
-                "module": {"type": "string", "description": "模块名，如 音效/转盘/UI/榜单/主页（必填）"},
-                "priority": {"type": "string", "description": "优先级 P0/P1/P2/P3（默认 P3）"},
-                "category": {"type": "string", "description": "类别（默认 功能测试）"},
-                "preconditions": {"type": "string", "description": "前置条件"},
+                "title": {"type": "string", "description": "用例标题（必填，非空校验）"},
+                "module": {"type": "string", "description": "模块名，如 登录/支付/搜索/音效/转盘/UI/榜单/主页（必填，非空校验）"},
+                "priority": {"type": "string", "description": "优先级 P0/P1/P2/P3（空则默认 P3）"},
+                "category": {"type": "string", "description": "类别（空则默认 功能测试）"},
+                "preconditions": {"type": "string", "description": "前置条件（自动 trim 去换行）"},
                 "steps": {"type": "array", "items": {"type": "string"}, "description": "测试步骤列表（自动过滤空行）"},
-                "expected": {"type": "string", "description": "预期结果"},
-                "tags": {"type": "array", "items": {"type": "string"}, "description": "标签列表"},
-                "project": {"type": "string", "description": "所属项目（可选项，留空默认取 module）"},
-                "creator": {"type": "string", "description": "创建人（默认 MCP）"},
+                "expected": {"type": "string", "description": "预期结果（自动 trim 去换行）"},
+                "tags": {"type": "array", "items": {"type": "string"}, "description": "标签列表（自动过滤空元素）"},
+                "project": {"type": "string", "description": "项目类型，如 slot游戏/后台/活动/大厅/新手引导（可空）"},
+                "creator": {"type": "string", "description": "创建人（空则默认 MCP）"},
             },
             "required": ["title", "module"],
         },
     },
     {
         "name": "tc_add_batch",
-        "description": "批量添加测试用例（自动清洗每条）。传入 cases 数组，每条结构和 tc_add 一致",
+        "description": "批量添加测试用例（逐条清洗，单条失败不阻塞整体）。清洗规则同 tc_add：标题/模块必填非空；project 为项目类型（如 slot游戏/后台/活动），空则留空；priority→P3；category→功能测试；creator→MCP；steps/tags 空元素自动过滤；所有文本 trim+合并空白。返回成功/失败统计和模块分布",
         "inputSchema": {
             "type": "object",
             "properties": {
                 "cases": {
                     "type": "array",
-                    "description": "用例数组，每条必填 title, module",
+                    "description": "用例数组（每条清洗规则同 tc_add），每条必填 title, module",
                     "items": {
                         "type": "object",
                         "properties": {
-                            "title": {"type": "string", "description": "用例标题（必填）"},
-                            "module": {"type": "string", "description": "模块名（必填）"},
-                            "priority": {"type": "string", "description": "优先级"},
-                            "category": {"type": "string", "description": "类别"},
+                            "title": {"type": "string", "description": "用例标题（必填，非空校验）"},
+                            "module": {"type": "string", "description": "模块名（必填，非空校验）"},
+                            "priority": {"type": "string", "description": "优先级（空则默认 P3）"},
+                            "category": {"type": "string", "description": "类别（空则默认 功能测试）"},
                             "preconditions": {"type": "string", "description": "前置条件"},
-                            "steps": {"type": "array", "items": {"type": "string"}, "description": "测试步骤"},
+                            "steps": {"type": "array", "items": {"type": "string"}, "description": "测试步骤列表（空元素过滤）"},
                             "expected": {"type": "string", "description": "预期结果"},
-                            "tags": {"type": "array", "items": {"type": "string"}, "description": "标签"},
-                            "project": {"type": "string", "description": "所属项目"},
-                            "creator": {"type": "string", "description": "创建人"},
+                            "tags": {"type": "array", "items": {"type": "string"}, "description": "标签列表（空元素过滤）"},
+                            "project": {"type": "string", "description": "项目类型（如 slot游戏/后台/活动），空则留空"},
+                            "creator": {"type": "string", "description": "创建人（空则 MCP）"},
                         },
                         "required": ["title", "module"],
                     },

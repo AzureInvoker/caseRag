@@ -20,3 +20,6 @@ venv/
 # 日志
 # 系统
 # 配置文件（每台机器自定义）
+chroma_db.zip
+img/
+img_backup/

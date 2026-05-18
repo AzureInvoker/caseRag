@@ -35,6 +35,7 @@ class TestCase:
     steps: list = field(default_factory=list)   # 测试步骤
     expected: str = ""                 # 预期结果
     tags: list = field(default_factory=list)    # 标签
+    sub_module: str = ""               # 子模块/测试点 (如: 扣费、玩法触发、派奖)
     project: str = ""                  # 项目类型 (如: slot游戏、后台、活动)
     creator: str = ""                  # 创建人
     created_at: str = ""               # 创建时间
@@ -44,6 +45,7 @@ class TestCase:
         parts = [
             f"标题: {self.title}",
             f"模块: {self.module}",
+            f"子模块: {self.sub_module}" if self.sub_module else "",
             f"优先级: {self.priority}",
             f"类别: {self.category}",
             f"前置条件: {self.preconditions}",
@@ -57,6 +59,8 @@ class TestCase:
     def get_bm25_text(self) -> str:
         """生成用于 BM25 关键词搜索的文本（聚焦高信号字段）"""
         parts = [self.title, self.module]
+        if self.sub_module:
+            parts.append(self.sub_module)
         if self.tags:
             parts.append(", ".join(self.tags))
         if self.preconditions:
@@ -74,6 +78,7 @@ class TestCase:
             "id": self.id,
             "title": self.title,
             "module": self.module,
+            "sub_module": self.sub_module,
             "priority": self.priority,
             "category": self.category,
             "preconditions": self.preconditions,
@@ -140,6 +145,7 @@ class VectorEngine:
                 "id": tc.id,
                 "title": tc.title,
                 "module": tc.module,
+                "sub_module": tc.sub_module,
                 "priority": tc.priority,
                 "category": tc.category,
                 "tags": ",".join(tc.tags),
@@ -169,6 +175,7 @@ class VectorEngine:
                 "id": tc.id,
                 "title": tc.title,
                 "module": tc.module,
+                "sub_module": tc.sub_module,
                 "priority": tc.priority,
                 "category": tc.category,
                 "tags": ",".join(tc.tags),
@@ -218,7 +225,7 @@ class VectorEngine:
 
     def search(self, query: str, n_results: int = 10,
                module: str = None, priority: str = None,
-               category: str = None) -> list[dict]:
+               category: str = None, sub_module: str = None) -> list[dict]:
         """
         混合搜索测试用例（向量 0.6 + BM25 关键词 0.4）
 
@@ -237,19 +244,48 @@ class VectorEngine:
             where_parts.append({"priority": priority})
         if category:
             where_parts.append({"category": category})
+        if sub_module:
+            where_parts.append({"sub_module": sub_module})
         where_clause = {"$and": where_parts} if len(where_parts) > 1 else (where_parts[0] if where_parts else None)
 
         # ── 1. 向量搜索 ──
-        vec_results = self.collection.query(
-            query_embeddings=query_emb,
-            n_results=n_results * 3,  # generous top-K，给融合留空间
-            where=where_clause,
-        )
+        # ChromaDB 1.5.x 的 query() + where 有 bug（Internal error: Error finding id），
+        # 改用: 先用 get(where=) 拿允许的 ID 集合，再在应用层做后过滤
+        allowed_ids = None
+        if where_clause:
+            try:
+                get_result = self.collection.get(where=where_clause)
+                allowed_ids = set(get_result["ids"]) if get_result["ids"] else set()
+            except Exception:
+                allowed_ids = None  # 降级: 不过滤
 
-        # 构建 ID → 结果映射
+        try:
+            vec_results = self.collection.query(
+                query_embeddings=query_emb,
+                n_results=n_results * 3,
+                where=where_clause,
+            )
+            chromadb_where_ok = True
+        except Exception:
+            chromadb_where_ok = False
+            vec_results = {"ids": [[]], "metadatas": [[]], "distances": [[]], "documents": [[]]}
+
+        if not chromadb_where_ok or allowed_ids is not None:
+            # ChromaDB query+where 挂了，或者有 where 条件需要后过滤，
+            # 用 get(where=) 拿到允许的 ID，不做 where 重查
+            if not chromadb_where_ok:
+                # 回退: 无 where 查询
+                vec_results = self.collection.query(
+                    query_embeddings=query_emb,
+                    n_results=n_results * 6,  # 更大范围，留够后过滤空间
+                )
+
+        # 构建 ID → 结果映射（应用层后过滤）
         hit_map = {}
         if vec_results["ids"] and vec_results["ids"][0]:
             for i, id_ in enumerate(vec_results["ids"][0]):
+                if allowed_ids and id_ not in allowed_ids:
+                    continue
                 meta = vec_results["metadatas"][0][i]
                 dist = vec_results["distances"][0][i]
                 doc = vec_results["documents"][0][i] if vec_results["documents"] else ""
@@ -316,6 +352,7 @@ class VectorEngine:
                 "id": id_,
                 "title": meta.get("title", ""),
                 "module": meta.get("module", ""),
+                "sub_module": meta.get("sub_module", ""),
                 "priority": meta.get("priority", ""),
                 "category": meta.get("category", ""),
                 "tags": meta.get("tags", "").split(",") if meta.get("tags") else [],
@@ -417,6 +454,7 @@ class VectorEngine:
             "id": case_id,
             "title": meta.get("title", ""),
             "module": meta.get("module", ""),
+            "sub_module": meta.get("sub_module", ""),
             "priority": meta.get("priority", ""),
             "category": meta.get("category", ""),
             "tags": meta.get("tags", "").split(",") if meta.get("tags") else [],
@@ -487,7 +525,8 @@ class VectorEngine:
         return result
 
     def get_all(self, module: str = None, priority: str = None,
-                category: str = None, offset: int = 0, limit: int = 50) -> list[dict]:
+                category: str = None, sub_module: str = None,
+                offset: int = 0, limit: int = 50) -> list[dict]:
         """分页列出用例"""
         where_parts = []
         if module:
@@ -496,6 +535,8 @@ class VectorEngine:
             where_parts.append({"priority": priority})
         if category:
             where_parts.append({"category": category})
+        if sub_module:
+            where_parts.append({"sub_module": sub_module})
         where_clause = {"$and": where_parts} if len(where_parts) > 1 else (where_parts[0] if where_parts else None)
 
         results = self.collection.get(
@@ -511,6 +552,7 @@ class VectorEngine:
                     "id": id_,
                     "title": meta.get("title", ""),
                     "module": meta.get("module", ""),
+                    "sub_module": meta.get("sub_module", ""),
                     "priority": meta.get("priority", ""),
                     "category": meta.get("category", ""),
                     "tags": meta.get("tags", "").split(",") if meta.get("tags") else [],

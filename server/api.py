@@ -84,6 +84,7 @@ def _make_tc(args: dict) -> "TestCase":
     return TestCase(
         title=title,
         module=module,
+        sub_module=_clean_text(args.get("sub_module", "")),
         project=project,
         priority=_clean_text(args.get("priority", "P3")) or "P3",
         category=_clean_text(args.get("category", "功能测试")) or "功能测试",
@@ -112,6 +113,7 @@ def _mcp_handle(name: str, args: dict) -> dict:
             query=query,
             n_results=min(int(args.get("n_results", 5)), 20),
             module=args.get("module"),
+            sub_module=args.get("sub_module"),
             priority=args.get("priority"),
             category=args.get("category"),
         )
@@ -126,6 +128,7 @@ def _mcp_handle(name: str, args: dict) -> dict:
                 f"|------|-----|\n"
                 f"| ID | `{r['id']}` |\n"
                 f"| 模块 | {r['module']} |\n"
+                f"| 子模块 | {r.get('sub_module', '') or '-'} |\n"
                 f"| 优先级 | {r['priority']} |\n"
                 f"| 类别 | {r['category']} |\n"
             )
@@ -137,6 +140,7 @@ def _mcp_handle(name: str, args: dict) -> dict:
     elif name == "tc_list":
         items = engine.get_all(
             module=args.get("module"),
+            sub_module=args.get("sub_module"),
             priority=args.get("priority"),
             category=args.get("category"),
             offset=int(args.get("offset", 0)),
@@ -147,8 +151,9 @@ def _mcp_handle(name: str, args: dict) -> dict:
         text = f"## 📋 用例列表（共 {len(items)} 条）\n\n"
         for i, item in enumerate(items):
             tags_str = f" [{', '.join(item['tags'])}]" if item.get("tags") else ""
+            sub = f" | 子模块:{item.get('sub_module', '')}" if item.get('sub_module') else ""
             text += f"{i+1}. **{item['title']}**\n"
-            text += f"   `{item['id']}` | {item['module']} | {item['priority']} | {item['category']}{tags_str}\n"
+            text += f"   `{item['id']}` | {item['module']}{sub} | {item['priority']} | {item['category']}{tags_str}\n"
         return {"content": [{"type": "text", "text": text.strip()}]}
 
     elif name == "tc_get":
@@ -255,6 +260,7 @@ def _mcp_handle_tc_add(args: dict) -> dict:
                 f"| ID | `{tc.id}` |\n"
                 f"| 标题 | {tc.title} |\n"
                 f"| 模块 | {tc.module} |\n"
+                f"| 子模块 | {tc.sub_module or '-'} |\n"
                 f"| 项目 | {tc.project} |\n"
                 f"| 优先级 | {tc.priority} |\n"
                 f"| 类别 | {tc.category} |\n"
@@ -572,6 +578,7 @@ async def mcp_message(msg: MCPMessage, request: Request, session_id: str = Query
 class CaseCreate(BaseModel):
     title: str = Field(..., description="用例标题")
     module: str = Field(..., description="模块名，如 登录/支付/搜索")
+    sub_module: str = Field("", description="子模块/测试点，如：扣费/玩法触发/派奖")
     priority: str = Field("P3", description="P0/P1/P2/P3")
     category: str = Field("功能测试", description="功能测试/性能测试/安全测试/回归测试")
     preconditions: str = Field("", description="前置条件")
@@ -589,7 +596,8 @@ class CaseBatchCreate(BaseModel):
 class SearchRequest(BaseModel):
     query: str = Field(..., description="搜索关键词或自然语言问句")
     n_results: int = Field(10, description="返回数量", ge=1, le=50)
-    module: str = Field("", description="按模块筛选")
+    module: str = Field("", description="按父模块筛选")
+    sub_module: str = Field("", description="按子模块/测试点精确筛选")
     priority: str = Field("", description="按优先级筛选")
     category: str = Field("", description="按类别筛选")
 
@@ -607,6 +615,7 @@ def create_case(case: CaseCreate):
     tc = TestCase(
         title=case.title,
         module=case.module,
+        sub_module=case.sub_module,
         priority=case.priority,
         category=case.category,
         preconditions=case.preconditions,
@@ -629,6 +638,7 @@ def create_cases_batch(batch: CaseBatchCreate):
         tc = TestCase(
             title=c.title,
             module=c.module,
+            sub_module=c.sub_module,
             priority=c.priority,
             category=c.category,
             preconditions=c.preconditions,
@@ -647,7 +657,8 @@ def create_cases_batch(batch: CaseBatchCreate):
 
 @app.get("/api/v1/cases")
 def list_cases(
-    module: str = Query("", description="按模块筛选"),
+    module: str = Query("", description="按父模块筛选"),
+    sub_module: str = Query("", description="按子模块/测试点精确筛选"),
     priority: str = Query("", description="按优先级筛选"),
     category: str = Query("", description="按类别筛选"),
     offset: int = Query(0, ge=0),
@@ -655,6 +666,7 @@ def list_cases(
 ):
     items = engine.get_all(
         module=module or None,
+        sub_module=sub_module or None,
         priority=priority or None,
         category=category or None,
         offset=offset,
@@ -691,6 +703,7 @@ def search_cases(req: SearchRequest):
         query=req.query,
         n_results=req.n_results,
         module=req.module or None,
+        sub_module=req.sub_module or None,
         priority=req.priority or None,
         category=req.category or None,
     )

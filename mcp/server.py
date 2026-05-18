@@ -66,6 +66,7 @@ def _make_tc(args: dict) -> "TestCase":
     return TestCase(
         title=title,
         module=module,
+        sub_module=_clean_text(args.get("sub_module", "")),
         project=project,
         priority=_clean_text(args.get("priority", "P3")) or "P3",
         category=_clean_text(args.get("category", "功能测试")) or "功能测试",
@@ -85,7 +86,7 @@ engine = get_engine()
 TOOLS = [
     {
         "name": "tc_search",
-        "description": "语义搜索测试用例，返回最匹配的结果",
+        "description": "语义搜索测试用例，返回最匹配的结果。支持按 module（父模块）和 sub_module（子模块/测试点）精确筛选",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -100,7 +101,11 @@ TOOLS = [
                 },
                 "module": {
                     "type": "string",
-                    "description": "按模块筛选（如：登录/支付/搜索/权限）",
+                    "description": "按父模块筛选（如：spin/bonus玩法/Jackpot玩法/UI）",
+                },
+                "sub_module": {
+                    "type": "string",
+                    "description": "按子模块/测试点精确筛选（如：扣费/玩法触发/派奖/中奖效果），需先通过 tc_project_types 查看各模块下的具体子模块",
                 },
                 "priority": {
                     "type": "string",
@@ -116,11 +121,12 @@ TOOLS = [
     },
     {
         "name": "tc_list",
-        "description": "列出测试用例（支持按模块/优先级/类别筛选和分页）",
+        "description": "列出测试用例（支持按模块/优先级/类别/子模块筛选和分页）",
         "inputSchema": {
             "type": "object",
             "properties": {
-                "module": {"type": "string", "description": "按模块筛选"},
+                "module": {"type": "string", "description": "按父模块筛选"},
+                "sub_module": {"type": "string", "description": "按子模块/测试点精确筛选"},
                 "priority": {"type": "string", "description": "按优先级筛选"},
                 "category": {"type": "string", "description": "按类别筛选"},
                 "offset": {"type": "number", "description": "分页偏移"},
@@ -172,6 +178,7 @@ TOOLS = [
                 "steps": {"type": "array", "items": {"type": "string"}, "description": "测试步骤列表（自动过滤空行）"},
                 "expected": {"type": "string", "description": "预期结果（自动 trim 去换行）"},
                 "tags": {"type": "array", "items": {"type": "string"}, "description": "标签列表（自动过滤空元素）"},
+                "sub_module": {"type": "string", "description": "子模块/测试点，如：扣费/玩法触发/派奖/中奖效果/转场/首屏展示"},
                 "project": {"type": "string", "description": "项目类型，如 slot游戏/后台/活动/大厅/新手引导（可空）"},
                 "creator": {"type": "string", "description": "创建人（空则默认 MCP）"},
             },
@@ -198,6 +205,7 @@ TOOLS = [
                             "steps": {"type": "array", "items": {"type": "string"}, "description": "测试步骤列表（空元素过滤）"},
                             "expected": {"type": "string", "description": "预期结果"},
                             "tags": {"type": "array", "items": {"type": "string"}, "description": "标签列表（空元素过滤）"},
+                            "sub_module": {"type": "string", "description": "子模块/测试点，如：扣费/玩法触发/派奖"},
                             "project": {"type": "string", "description": "项目类型（如 slot游戏/后台/活动），空则留空"},
                             "creator": {"type": "string", "description": "创建人（空则 MCP）"},
                         },
@@ -285,6 +293,7 @@ def handle_tool(name: str, args: dict) -> dict:
             query=query,
             n_results=min(int(args.get("n_results", 5)), 20),
             module=args.get("module"),
+            sub_module=args.get("sub_module"),
             priority=args.get("priority"),
             category=args.get("category"),
         )
@@ -300,6 +309,7 @@ def handle_tool(name: str, args: dict) -> dict:
                 f"|------|-----|\n"
                 f"| ID | `{r['id']}` |\n"
                 f"| 模块 | {r['module']} |\n"
+                f"| 子模块 | {r.get('sub_module', '') or '-'} |\n"
                 f"| 优先级 | {r['priority']} |\n"
                 f"| 类别 | {r['category']} |\n"
                 f"| 项目 | {r.get('project', '')} |\n"
@@ -312,6 +322,7 @@ def handle_tool(name: str, args: dict) -> dict:
     elif name == "tc_list":
         items = engine.get_all(
             module=args.get("module"),
+            sub_module=args.get("sub_module"),
             priority=args.get("priority"),
             category=args.get("category"),
             offset=int(args.get("offset", 0)),
@@ -398,6 +409,7 @@ def handle_tool(name: str, args: dict) -> dict:
                     f"| ID | `{tc.id}` |\n"
                     f"| 标题 | {tc.title} |\n"
                     f"| 模块 | {tc.module} |\n"
+                    f"| 子模块 | {tc.sub_module or '-'} |\n"
                     f"| 项目 | {tc.project} |\n"
                     f"| 优先级 | {tc.priority} |\n"
                     f"| 类别 | {tc.category} |\n"

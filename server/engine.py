@@ -441,6 +441,18 @@ class VectorEngine:
             "categories": categories,
         }
 
+    def get_project_types(self) -> list[str]:
+        """获取所有已录入的项目类型（去重排序）"""
+        all_docs = self.collection.get()
+        if not all_docs["ids"]:
+            return []
+        types = set()
+        for meta in all_docs["metadatas"]:
+            p = meta.get("project", "")
+            if p:
+                types.add(p)
+        return sorted(types)
+
     def get_all(self, module: str = None, priority: str = None,
                 category: str = None, offset: int = 0, limit: int = 50) -> list[dict]:
         """分页列出用例"""

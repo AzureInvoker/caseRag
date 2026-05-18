@@ -150,8 +150,17 @@ TOOLS = [
         },
     },
     {
+        "name": "tc_project_types",
+        "description": "获取已录入的所有项目类型列表（去重排序）。在调用 tc_add / tc_add_batch 前应先查询本接口，了解已有的项目类型后再填写 project 字段，确保数据一致性",
+        "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "required": [],
+        },
+    },
+    {
         "name": "tc_add",
-        "description": "添加单条测试用例。自动清洗规则：标题/模块必填且非空；project 为项目类型（如 slot游戏/后台/活动），空则留空；优先级默认为 P3；类别默认为 功能测试；创建人默认 MCP；steps/tags 中空元素自动过滤；所有文本 trim 首尾并合并多余空白/换行；非字符串字段降级为空串",
+        "description": "【重要】添加前先调用 tc_project_types 查询已有项目类型，统一使用已有的类型名。添加单条测试用例。自动清洗规则：标题/模块必填且非空；project 为项目类型（如 slot游戏/后台/活动），空则留空；优先级默认为 P3；类别默认为 功能测试；创建人默认 MCP；steps/tags 中空元素自动过滤；所有文本 trim 首尾并合并多余空白/换行；非字符串字段降级为空串",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -171,7 +180,7 @@ TOOLS = [
     },
     {
         "name": "tc_add_batch",
-        "description": "批量添加测试用例（逐条清洗，单条失败不阻塞整体）。清洗规则同 tc_add：标题/模块必填非空；project 为项目类型（如 slot游戏/后台/活动），空则留空；priority→P3；category→功能测试；creator→MCP；steps/tags 空元素自动过滤；所有文本 trim+合并空白。返回成功/失败统计和模块分布",
+        "description": "【重要】添加前先调用 tc_project_types 查询已有项目类型，统一使用已有的类型名。批量添加测试用例（逐条清洗，单条失败不阻塞整体）。清洗规则同 tc_add：标题/模块必填非空；project 为项目类型（如 slot游戏/后台/活动），空则留空；priority→P3；category→功能测试；creator→MCP；steps/tags 空元素自动过滤；所有文本 trim+合并空白。返回成功/失败统计和模块分布",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -345,6 +354,16 @@ def handle_tool(name: str, args: dict) -> dict:
             for c, count in sorted(stats_data["categories"].items(), key=lambda x: -x[1]):
                 text += f"- {c}: {count} 条\n"
         return {"content": [{"type": "text", "text": text.strip()}]}
+
+    elif name == "tc_project_types":
+        types = engine.get_project_types()
+        if not types:
+            return {"content": [{"type": "text", "text": "📋 当前没有已录入的项目类型，project 字段可留空"}]}
+        text = "## 📋 已录入的项目类型\n\n"
+        for i, t in enumerate(types, 1):
+            text += f"{i}. **{t}**\n"
+        text += "\n💡 添加新用例时请从以上类型中选择，保持数据一致性。如需新增类型，请确认不存在近似名称后直接填写新值"
+        return {"content": [{"type": "text", "text": text}]}
 
     elif name == "tc_add":
         try:

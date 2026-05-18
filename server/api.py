@@ -80,8 +80,6 @@ def _make_tc(args: dict) -> "TestCase":
         raise ValueError("模块名不能为空")
 
     project = _clean_text(args.get("project", ""))
-    if not project:
-        project = module  # project 默认取 module
 
     return TestCase(
         title=title,
@@ -187,6 +185,16 @@ def _mcp_handle(name: str, args: dict) -> dict:
             for p, count in sorted(stats_data["priorities"].items()):
                 text += f"- {p}: {count} 条\n"
         return {"content": [{"type": "text", "text": text.strip()}]}
+
+    elif name == "tc_project_types":
+        types = engine.get_project_types()
+        if not types:
+            return {"content": [{"type": "text", "text": "📋 当前没有已录入的项目类型，project 字段可留空"}]}
+        text = "## 📋 已录入的项目类型\n\n"
+        for i, t in enumerate(types, 1):
+            text += f"{i}. **{t}**\n"
+        text += "\n💡 添加新用例时请从以上类型中选择，保持数据一致性。如需新增类型，请确认不存在近似名称后直接填写新值"
+        return {"content": [{"type": "text", "text": text}]}
 
     else:
         return {"content": [{"type": "text", "text": f"未知工具: {name}"}]}
@@ -324,8 +332,17 @@ MCP_TOOLS = [
         "inputSchema": {"type": "object", "properties": {}},
     },
     {
+        "name": "tc_project_types",
+        "description": "获取已录入的所有项目类型列表（去重排序）。在调用 tc_add / tc_add_batch 前应先查询本接口，了解已有的项目类型后再填写 project 字段，确保数据一致性",
+        "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "required": [],
+        },
+    },
+    {
         "name": "tc_add",
-        "description": "添加一条新的测试用例到知识库（自动清洗输入：去换行、trim、过滤空元素）。注意：project 为可选项，留空则自动取 module 值",
+        "description": "【重要】添加前先调用 tc_project_types 查询已有项目类型，统一使用已有的类型名。添加一条新的测试用例到知识库（自动清洗输入：去换行、trim、过滤空元素）。注意：project 为项目类型（如 slot游戏/后台/活动），空则留空，不再默认取 module",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -337,7 +354,7 @@ MCP_TOOLS = [
                 "steps": {"type": "array", "items": {"type": "string"}, "description": "测试步骤列表（自动过滤空行和换行符）"},
                 "expected": {"type": "string", "description": "预期结果"},
                 "tags": {"type": "array", "items": {"type": "string"}, "description": "标签列表（自动过滤空元素）"},
-                "project": {"type": "string", "description": "所属项目（可选项，留空则默认取 module 值）"},
+                "project": {"type": "string", "description": "项目类型，如 slot游戏/后台/活动（可空，建议先查 tc_project_types）"},
                 "creator": {"type": "string", "description": "创建人（默认 MCP）"},
             },
             "required": ["title", "module"],
@@ -345,7 +362,7 @@ MCP_TOOLS = [
     },
     {
         "name": "tc_add_batch",
-        "description": "批量添加测试用例（自动清洗每条输入）。传入 cases 数组，每条结构和 tc_add 一致",
+        "description": "【重要】添加前先调用 tc_project_types 查询已有项目类型，统一使用已有的类型名。批量添加测试用例（自动清洗每条）。传入 cases 数组，每条结构和 tc_add 一致",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -363,7 +380,7 @@ MCP_TOOLS = [
                             "steps": {"type": "array", "items": {"type": "string"}, "description": "测试步骤"},
                             "expected": {"type": "string", "description": "预期结果"},
                             "tags": {"type": "array", "items": {"type": "string"}, "description": "标签"},
-                            "project": {"type": "string", "description": "所属项目（可选项）"},
+                            "project": {"type": "string", "description": "项目类型（可空，建议先查 tc_project_types）"},
                             "creator": {"type": "string", "description": "创建人"},
                         },
                         "required": ["title", "module"],
@@ -647,3 +664,9 @@ def search_cases(req: SearchRequest):
 @app.get("/api/v1/stats")
 def stats():
     return engine.get_stats()
+
+
+@app.get("/api/v1/project-types")
+def project_types():
+    """获取所有已录入的项目类型列表"""
+    return {"project_types": engine.get_project_types()}

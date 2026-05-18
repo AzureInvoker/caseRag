@@ -1,25 +1,22 @@
-# 向量数据库
+
 .chroma_db/*
-
-# 配置文件（每台机器自定义）
 config.yaml
-
-# Python
+.DS_Store
+*.egg-info/
+# IDE
+.idea/
+img/\nimg_backup/
+*.log
 __pycache__/
 *.py[cod]
-*.egg-info/
-venv/
-.venv/
-
-# IDE
-.vscode/
-.idea/
+# Python
 *.swp
-
-# 日志
-*.log
-/tmp/
-
-# 系统
-.DS_Store
 Thumbs.db
+/tmp/
+.venv/
+venv/
+.vscode/
+# 向量数据库
+# 日志
+# 系统
+# 配置文件（每台机器自定义）

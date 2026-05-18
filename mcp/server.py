@@ -369,13 +369,16 @@ def handle_tool(name: str, args: dict) -> dict:
         return {"content": [{"type": "text", "text": text.strip()}]}
 
     elif name == "tc_project_types":
-        types = engine.get_project_types()
-        if not types:
+        details = engine.get_project_types_detail()
+        if not details:
             return {"content": [{"type": "text", "text": "📋 当前没有已录入的项目类型，project 字段可留空"}]}
         text = "## 📋 已录入的项目类型\n\n"
-        for i, t in enumerate(types, 1):
-            text += f"{i}. **{t}**\n"
-        text += "\n💡 添加新用例时请从以上类型中选择，保持数据一致性。如需新增类型，请确认不存在近似名称后直接填写新值"
+        for d in details:
+            text += f"### {d['project']}（{d['module_count']} 个模块）\n"
+            for m in d['modules']:
+                text += f"  - {m}\n"
+            text += "\n"
+        text += "💡 添加新用例时请从以上项目类型中选择。如需新增类型，请确认不存在近似名称后直接填写新值"
         return {"content": [{"type": "text", "text": text}]}
 
     elif name == "tc_add":

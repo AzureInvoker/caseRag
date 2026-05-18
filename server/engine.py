@@ -230,14 +230,14 @@ class VectorEngine:
         返回: [{id, title, module, priority, category, tags, score, ...}]
         """
         query_emb = self.embedder.encode([query]).tolist()
-        where = {}
+        where_parts = []
         if module:
-            where["module"] = module
+            where_parts.append({"module": module})
         if priority:
-            where["priority"] = priority
+            where_parts.append({"priority": priority})
         if category:
-            where["category"] = category
-        where_clause = where if where else None
+            where_parts.append({"category": category})
+        where_clause = {"$and": where_parts} if len(where_parts) > 1 else (where_parts[0] if where_parts else None)
 
         # ── 1. 向量搜索 ──
         vec_results = self.collection.query(
@@ -382,13 +382,22 @@ class VectorEngine:
         for i in range(len(all_ids)):
             if scores[i] <= 0:
                 continue
-            # 应用 metadata 过滤
+            # 应用 metadata 过滤（兼容 $and 和 单条件两种格式）
             if where_clause:
                 skip = False
-                for key, val in where_clause.items():
-                    if metadata[i].get(key) != val:
-                        skip = True
-                        break
+                if "$and" in where_clause:
+                    for cond in where_clause["$and"]:
+                        for key, val in cond.items():
+                            if metadata[i].get(key) != val:
+                                skip = True
+                                break
+                        if skip:
+                            break
+                else:
+                    for key, val in where_clause.items():
+                        if metadata[i].get(key) != val:
+                            skip = True
+                            break
                 if skip:
                     continue
             results.append((all_ids[i], scores[i]))
@@ -453,19 +462,44 @@ class VectorEngine:
                 types.add(p)
         return sorted(types)
 
+    def get_project_types_detail(self) -> list[dict]:
+        """获取项目类型详情，包含每个项目下的模块列表"""
+        all_docs = self.collection.get()
+        if not all_docs["ids"]:
+            return []
+        proj_mods = {}
+        for meta in all_docs["metadatas"]:
+            p = meta.get("project", "")
+            m = meta.get("module", "")
+            if not p:
+                continue
+            if p not in proj_mods:
+                proj_mods[p] = {"project": p, "modules": set()}
+            proj_mods[p]["modules"].add(m)
+        result = []
+        for p in sorted(proj_mods):
+            mods = sorted(proj_mods[p]["modules"])
+            result.append({
+                "project": p,
+                "module_count": len(mods),
+                "modules": mods,
+            })
+        return result
+
     def get_all(self, module: str = None, priority: str = None,
                 category: str = None, offset: int = 0, limit: int = 50) -> list[dict]:
         """分页列出用例"""
-        where = {}
+        where_parts = []
         if module:
-            where["module"] = module
+            where_parts.append({"module": module})
         if priority:
-            where["priority"] = priority
+            where_parts.append({"priority": priority})
         if category:
-            where["category"] = category
+            where_parts.append({"category": category})
+        where_clause = {"$and": where_parts} if len(where_parts) > 1 else (where_parts[0] if where_parts else None)
 
         results = self.collection.get(
-            where=where if where else None,
+            where=where_clause,
             offset=offset,
             limit=limit,
         )

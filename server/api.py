@@ -21,9 +21,9 @@ import asyncio
 import re
 from datetime import datetime
 
-from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi import FastAPI, HTTPException, Query, Request, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, HTMLResponse
 from pydantic import BaseModel, Field
 
 from .engine import TestCase, get_engine
@@ -187,13 +187,16 @@ def _mcp_handle(name: str, args: dict) -> dict:
         return {"content": [{"type": "text", "text": text.strip()}]}
 
     elif name == "tc_project_types":
-        types = engine.get_project_types()
-        if not types:
+        details = engine.get_project_types_detail()
+        if not details:
             return {"content": [{"type": "text", "text": "📋 当前没有已录入的项目类型，project 字段可留空"}]}
         text = "## 📋 已录入的项目类型\n\n"
-        for i, t in enumerate(types, 1):
-            text += f"{i}. **{t}**\n"
-        text += "\n💡 添加新用例时请从以上类型中选择，保持数据一致性。如需新增类型，请确认不存在近似名称后直接填写新值"
+        for d in details:
+            text += f"### {d['project']}（{d['module_count']} 个模块）\n"
+            for m in d['modules']:
+                text += f"  - {m}\n"
+            text += "\n"
+        text += "💡 添加新用例时请从以上项目类型中选择。如需新增类型，请确认不存在近似名称后直接填写新值"
         return {"content": [{"type": "text", "text": text}]}
 
     elif name == "tc_delete":
@@ -701,5 +704,88 @@ def stats():
 
 @app.get("/api/v1/project-types")
 def project_types():
-    """获取所有已录入的项目类型列表"""
-    return {"project_types": engine.get_project_types()}
+    """获取所有已录入的项目类型列表（含各项目下的模块）"""
+    return {"project_types": engine.get_project_types_detail()}
+
+
+# ── 文件上传（临时，用于接收 ChromaDB 导出） ──
+
+import os as _os
+
+UPLOAD_DIR = "/tmp/testcase-uploads"
+_os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+
+@app.get("/upload")
+def upload_form():
+    """文件上传页面"""
+    return HTMLResponse(f"""
+    <!DOCTYPE html>
+    <html lang="zh">
+    <head><meta charset="utf-8"><title>文件上传</title>
+    <style>
+        body {{ font-family: sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }}
+        .drop {{ border: 2px dashed #ccc; border-radius: 8px; padding: 40px; text-align: center; }}
+        .drop.dragover {{ border-color: #4A90D9; background: #f0f6ff; }}
+        #file {{ display: none; }}
+        .btn {{ background: #4A90D9; color: #fff; border: none; padding: 10px 24px; border-radius: 6px; cursor: pointer; }}
+        #status {{ margin-top: 16px; font-size: 14px; }}
+    </style>
+    </head>
+    <body>
+    <h2>📤 上传文件</h2>
+    <div class="drop" id="drop">
+        <p>拖拽文件到此处，或点击选择</p>
+        <input type="file" id="file">
+        <button class="btn" onclick="document.getElementById('file').click()">选择文件</button>
+    </div>
+    <div id="status"></div>
+    <script>
+        const drop = document.getElementById('drop');
+        const fileInput = document.getElementById('file');
+        const status = document.getElementById('status');
+
+        drop.addEventListener('dragover', e => {{ e.preventDefault(); drop.classList.add('dragover') }});
+        drop.addEventListener('dragleave', () => drop.classList.remove('dragover'));
+        drop.addEventListener('drop', e => {{ e.preventDefault(); drop.classList.remove('dragover'); upload(e.dataTransfer.files[0]) }});
+        fileInput.addEventListener('change', () => upload(fileInput.files[0]));
+
+        async function upload(file) {{
+            if (!file) return;
+            status.innerHTML = '⏳ 上传中...';
+            const form = new FormData();
+            form.append('file', file);
+            try {{
+                const r = await fetch('/upload', {{ method: 'POST', body: form }});
+                const d = await r.json();
+                status.innerHTML = d.error ? `❌ ${{d.error}}` : `✅ ${{d.message}}<br>📁 ${{d.path}}`;
+            }} catch(e) {{
+                status.innerHTML = '❌ 上传失败: ' + e.message;
+            }}
+        }}
+    </script>
+    </body>
+    </html>
+    """)
+
+
+@app.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+    """接收上传文件"""
+    if not file.filename:
+        raise HTTPException(400, "文件名不能为空")
+
+    # 安全处理文件名
+    safe_name = _os.path.basename(file.filename)
+    save_path = _os.path.join(UPLOAD_DIR, safe_name)
+
+    content = await file.read()
+    with open(save_path, "wb") as f:
+        f.write(content)
+
+    size_mb = len(content) / 1024 / 1024
+    return {
+        "message": f"文件已保存: {safe_name} ({size_mb:.1f} MB)",
+        "path": save_path,
+        "size": len(content),
+    }

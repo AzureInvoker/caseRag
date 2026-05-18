@@ -48,7 +48,7 @@ class Config:
         self.api_host = os.getenv("TC_API_HOST", api_host)
         api_port_env = os.getenv("TC_API_PORT")
         self.api_port = int(api_port_env) if api_port_env else api_port
-        self.embed_model = os.getenv("TC_EMBED_MODEL", engine_cfg.get("embed_model", "all-MiniLM-L6-v2"))
+        self.embed_model = os.getenv("TC_EMBED_MODEL", engine_cfg.get("embed_model", "BAAI/bge-small-zh-v1.5"))
 
         chroma_dir = engine_cfg.get("chroma_dir", ".chroma_db")
         chroma_env = os.getenv("TC_CHROMA_DIR")

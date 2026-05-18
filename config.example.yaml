@@ -11,8 +11,8 @@ api:
 # 向量引擎
 engine:
   # 嵌入模型，可选：
-  #   all-MiniLM-L6-v2    (22MB, 最快，英文为主)
-  #   paraphrase-multilingual-MiniLM-L12-v2 (112MB, 支持中文)
-  embed_model: "all-MiniLM-L6-v2"
+  #   BAAI/bge-small-zh-v1.5    (33MB, ⭐推荐，原生中文)
+  #   all-MiniLM-L6-v2          (22MB, 纯英文，中文不适用)
+  embed_model: "BAAI/bge-small-zh-v1.5"
   # ChromaDB 持久化目录（相对于项目根目录）
   chroma_dir: ".chroma_db"

@@ -208,6 +208,19 @@ TOOLS = [
             "required": ["cases"],
         },
     },
+    {
+        "name": "tc_delete",
+        "description": "删除测试用例。支持两种模式：按 ID 删除单条，或按 module/project 批量删除。注意批量删除不可撤销",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "id": {"type": "string", "description": "用例 ID（按 ID 删单条时填写）"},
+                "module": {"type": "string", "description": "模块名，删除该模块下所有用例（批量模式）"},
+                "project": {"type": "string", "description": "项目类型，删除该项目下所有用例（批量模式）"},
+            },
+            "required": [],
+        },
+    },
 ]
 
 
@@ -423,6 +436,26 @@ def handle_tool(name: str, args: dict) -> dict:
             if len(added) > 10:
                 summary += f"  ... 还有 {len(added) - 10} 条\n"
         return {"content": [{"type": "text", "text": summary}]}
+
+    elif name == "tc_delete":
+        case_id = args.get("id", "").strip()
+        module = args.get("module", "").strip()
+        project = args.get("project", "").strip()
+
+        if case_id:
+            ok = engine.delete(case_id)
+            if ok:
+                return {"content": [{"type": "text", "text": f"✅ 用例 `{case_id}` 已删除"}]}
+            else:
+                return {"content": [{"type": "text", "text": f"❌ 用例 `{case_id}` 不存在"}]}
+        elif module or project:
+            count = engine.delete_many(module=module or None, project=project or None)
+            parts = []
+            if module: parts.append(f"模块={module}")
+            if project: parts.append(f"项目={project}")
+            return {"content": [{"type": "text", "text": f"✅ 已删除 {count} 条用例（{'，'.join(parts)}）"}]}
+        else:
+            return {"content": [{"type": "text", "text": "❌ 请提供 id（删单条），或 module/project（批量删除）"}]}
 
     else:
         return {"content": [{"type": "text", "text": f"未知工具: {name}"}]}

@@ -341,6 +341,9 @@ def _mcp_handle_tc_add(args: dict) -> dict:
         return {"content": [{"type": "text", "text": f"❌ {e}"}]}
     tc.id = tc.gen_id()
     engine.add(tc)
+    # 同步到 LightRAG 图谱
+    if lightrag_engine.is_available():
+        lightrag_engine.insert([tc.get_embedding_text()], ids=[tc.id])
     return {
         "content": [{
             "type": "text",
@@ -382,6 +385,12 @@ def _mcp_handle_tc_add_batch(args: dict) -> dict:
             added.append(tc)
         except ValueError as e:
             errors.append(f"第 {i+1} 条：{e}")
+
+    # 同步到 LightRAG 图谱（批量）
+    if added and lightrag_engine.is_available():
+        texts = [tc.get_embedding_text() for tc in added]
+        ids = [tc.id for tc in added]
+        lightrag_engine.insert(texts, ids=ids)
 
     summary = f"✅ 成功添加 {len(added)} 条"
     if errors:

@@ -2,17 +2,17 @@
 LightRAG 知识图谱引擎 — DeepSeek/Ollama 双模式封装
 
 支持两种 LLM 后端：
-  deepseek: 通过 API 调用（推荐，建图成本极低）
+  deepseek: 通过 OpenAI 兼容 API 调用（推荐，建图成本极低）
   ollama:   调用本地 Ollama 实例（内网部署用）
 
 嵌入统一使用 sentence-transformers（CPU 即可）。
 """
 
 import os
-import json
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
+from collections.abc import AsyncIterator
 
 logger = logging.getLogger("lightrag_engine")
 
@@ -21,41 +21,86 @@ def _build_llm_func(provider: str, api_key: str, base_url: str, model: str):
     """
     根据 provider 返回一个兼容 LightRAG 的 llm_model_func。
 
-    函数签名：async def llm_func(model: str, messages: list[dict], **kwargs) -> str
+    LightRAG 期望的函数签名：
+      async def func(
+          prompt: str,
+          system_prompt: str | None = None,
+          history_messages: list[dict] | None = None,
+          **kwargs,
+      ) -> str | AsyncIterator[str]:
     """
-    import httpx
 
     if provider == "deepseek":
-        api_base = "https://api.deepseek.com/v1"
-        headers = {
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-        }
+        import openai
 
-        async def deepseek_llm(model: str, messages: list, **kwargs) -> str:
-            payload = {
-                "model": model,
-                "messages": messages,
-                "stream": False,
-                **{k: v for k, v in kwargs.items() if k in ("temperature", "max_tokens")},
-            }
-            async with httpx.AsyncClient(timeout=180) as client:
-                resp = await client.post(f"{api_base}/chat/completions", json=payload, headers=headers)
-                resp.raise_for_status()
-                return resp.json()["choices"][0]["message"]["content"]
+        client = openai.AsyncOpenAI(
+            api_key=api_key,
+            base_url="https://api.deepseek.com/v1",
+        )
+
+        async def deepseek_llm(
+            prompt,
+            system_prompt=None,
+            history_messages=None,
+            **kwargs,
+        ) -> str:
+            # 从 kwargs 中提取模型名（LightRAG 会传）
+            model_name = model
+            if "hashing_kv" in kwargs:
+                try:
+                    model_name = kwargs["hashing_kv"].global_config.get("llm_model_name", model)
+                except Exception:
+                    pass
+
+            messages = []
+            if system_prompt:
+                messages.append({"role": "system", "content": system_prompt})
+            if history_messages:
+                messages.extend(history_messages)
+            messages.append({"role": "user", "content": prompt})
+
+            resp = await client.chat.completions.create(
+                model=model_name,
+                messages=messages,
+                temperature=kwargs.get("temperature", 0.1),
+                max_tokens=kwargs.get("max_tokens", 2048),
+                stream=False,
+            )
+            return resp.choices[0].message.content
 
         return deepseek_llm
 
     elif provider == "ollama":
-        async def ollama_llm(model: str, messages: list, **kwargs) -> str:
+        import httpx
+
+        async def ollama_llm(
+            prompt,
+            system_prompt=None,
+            history_messages=None,
+            **kwargs,
+        ) -> str:
+            model_name = model
+            if "hashing_kv" in kwargs:
+                try:
+                    model_name = kwargs["hashing_kv"].global_config.get("llm_model_name", model)
+                except Exception:
+                    pass
+
+            messages = []
+            if system_prompt:
+                messages.append({"role": "system", "content": system_prompt})
+            if history_messages:
+                messages.extend(history_messages)
+            messages.append({"role": "user", "content": prompt})
+
             payload = {
-                "model": model,
+                "model": model_name,
                 "messages": messages,
                 "stream": False,
-                "options": {k: v for k, v in kwargs.items() if k in ("temperature", "num_predict")},
+                "options": {"temperature": kwargs.get("temperature", 0.1)},
             }
-            async with httpx.AsyncClient(timeout=300) as client:
-                resp = await client.post(f"{base_url}/api/chat", json=payload)
+            async with httpx.AsyncClient(timeout=300) as http:
+                resp = await http.post(f"{base_url}/api/chat", json=payload)
                 resp.raise_for_status()
                 return resp.json()["message"]["content"]
 
@@ -68,20 +113,26 @@ def _build_llm_func(provider: str, api_key: str, base_url: str, model: str):
 def _build_embed_func(model_name: str):
     """返回一个兼容 LightRAG 的 embedding_func
 
-    函数签名：async def embed_func(texts: list[str]) -> list[list[float]]
+    需要用 @wrap_embedding_func_with_attrs 装饰，LightRAG 内部会访问 .func 属性。
     """
+    from lightrag.utils import wrap_embedding_func_with_attrs
     from sentence_transformers import SentenceTransformer
 
-    # 全局缓存，避免重复加载
+    # 全局缓存模型，避免重复加载
     if not hasattr(_build_embed_func, "_model"):
         logger.info(f"加载嵌入模型: {model_name}")
         _build_embed_func._model = SentenceTransformer(model_name, device="cpu")
-
     model = _build_embed_func._model
 
-    async def embed_func(texts: list[str]) -> list[list[float]]:
+    @wrap_embedding_func_with_attrs(
+        embedding_dim=model.get_embedding_dimension(),
+        max_token_size=512,
+        model_name=model_name,
+    )
+    async def embed_func(texts: list[str]) -> "np.ndarray":
+        import numpy as np
         embeddings = model.encode(texts, show_progress_bar=False)
-        return embeddings.tolist()
+        return np.array(embeddings, dtype=np.float32)
 
     return embed_func
 
@@ -90,18 +141,10 @@ class LightRAGEngine:
     """LightRAG 知识图谱引擎封装"""
 
     def __init__(self, config):
-        """
-        config 需要包含：
-          lightrag_enabled, lightrag_working_dir, lightrag_embed_model
-          llm_provider, deepseek_api_key, ollama_base_url, llm_model
-          lightrag_top_k, lightrag_mode
-        """
         self.cfg = config
         self._rag = None
         self._ready = False
         self._error = None
-
-    # ── 初始化 ──
 
     def _lazy_init(self):
         if self._rag is not None:
@@ -116,7 +159,6 @@ class LightRAGEngine:
 
             working_dir = self.cfg.lightrag_working_dir
             if not os.path.isabs(working_dir):
-                # 相对路径以项目根为准
                 working_dir = str(Path(__file__).parent.parent / working_dir)
             os.makedirs(working_dir, exist_ok=True)
 
@@ -142,6 +184,18 @@ class LightRAGEngine:
                 max_parallel_insert=2,
             )
 
+            # 初始化存储（必须调，否则 insert 报错）
+            import asyncio
+            try:
+                loop = asyncio.get_running_loop()
+            except RuntimeError:
+                loop = None
+            if loop and loop.is_running():
+                # 已有事件循环 → 创建新 loop 来跑
+                asyncio.run_coroutine_threadsafe(self._rag.initialize_storages(), loop).result()
+            else:
+                asyncio.run(self._rag.initialize_storages())
+
             self._QueryParam = QueryParam
             self._ready = True
             logger.info(f"LightRAG 初始化成功 (provider={self.cfg.llm_provider}, model={self.cfg.llm_model})")
@@ -152,7 +206,6 @@ class LightRAGEngine:
             logger.error(f"LightRAG 初始化失败: {e}")
 
     def _resolve_api_key(self) -> str:
-        """解析 API Key（支持 ${ENV_VAR} 或直接明文）"""
         key = self.cfg.deepseek_api_key
         if key.startswith("${") and key.endswith("}"):
             env_name = key[2:-1]
@@ -168,23 +221,12 @@ class LightRAGEngine:
         return self._error
 
     def is_available(self) -> bool:
-        """检查 LightRAG 是否可用（配置启用 + 初始化成功）"""
         if not self.cfg.lightrag_enabled:
             return False
         self._lazy_init()
         return self._ready
 
-    # ── 数据写入 ──
-
     def insert(self, texts: list[str], ids: list[str] = None) -> dict:
-        """
-        插入文档并建图。
-
-        参数：
-          texts: 文档文本列表
-          ids:   可选的文档 ID 列表
-        返回: {ok: bool, message: str, track_id: str or None}
-        """
         if not self.is_available():
             return {"ok": False, "message": self._error or "LightRAG 不可用"}
         try:
@@ -194,20 +236,7 @@ class LightRAGEngine:
             logger.error(f"LightRAG insert 失败: {e}")
             return {"ok": False, "message": str(e)}
 
-    # ── 检索 ──
-
     def search(self, query: str, n_results: int = 5) -> dict:
-        """
-        知识图谱检索（返回结构化数据，不调 LLM 生成回答）。
-
-        返回: {
-          ok: bool,
-          entities: [...],      # 命中的实体
-          relationships: [...], # 实体间关系
-          chunks: [...],        # 相关文本片段
-          message: str,
-        }
-        """
         if not self.is_available():
             return {"ok": False, "message": self._error or "LightRAG 不可用", "entities": [], "relationships": [], "chunks": []}
 
@@ -224,8 +253,6 @@ class LightRAGEngine:
                 return {"ok": False, "message": result.get("message", "未知错误"), "entities": [], "relationships": [], "chunks": []}
 
             data = result.get("data", {})
-
-            # 精简实体
             entities = []
             for e in data.get("entities", []):
                 entities.append({
@@ -233,8 +260,6 @@ class LightRAGEngine:
                     "type": e.get("entity_type", ""),
                     "description": e.get("description", ""),
                 })
-
-            # 精简关系
             relationships = []
             for r in data.get("relationships", []):
                 relationships.append({
@@ -243,8 +268,6 @@ class LightRAGEngine:
                     "description": r.get("description", ""),
                     "weight": r.get("weight", 0),
                 })
-
-            # 精简文本片段
             chunks = []
             for c in data.get("chunks", []):
                 chunks.append({
@@ -265,16 +288,22 @@ class LightRAGEngine:
             return {"ok": False, "message": str(e), "entities": [], "relationships": [], "chunks": []}
 
     def get_status(self) -> dict:
-        """获取 LightRAG 状态"""
         if not self.cfg.lightrag_enabled:
             return {"enabled": False, "ready": False, "message": "未启用"}
         self._lazy_init()
         if not self._ready:
             return {"enabled": True, "ready": False, "message": self._error or "初始化失败"}
         try:
-            status = self._rag.get_processing_status()
-            # count entities
-            graph = self._rag.get_knowledge_graph("")
+            import asyncio
+            # run async methods in sync context
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                status = loop.run_until_complete(self._rag.get_processing_status())
+                graph = loop.run_until_complete(self._rag.get_knowledge_graph(""))
+            finally:
+                loop.close()
+
             node_count = 0
             if graph:
                 try:

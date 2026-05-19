@@ -43,8 +43,6 @@ from search import SearchRouter
 
 mcp_cfg = get_config()
 mcp_lightrag = LightRAGEngine(mcp_cfg)
-mcp_engine = get_engine()
-mcp_search_router = SearchRouter(mcp_engine, mcp_lightrag)
 
 # ── 输入清洗 ──
 
@@ -452,6 +450,9 @@ def handle_tool(name: str, args: dict) -> dict:
             return {"content": [{"type": "text", "text": f"❌ {e}"}]}
         tc.id = tc.gen_id()
         engine.add(tc)
+        # 同步到 LightRAG 图谱
+        if mcp_lightrag.is_available():
+            mcp_lightrag.insert([tc.get_embedding_text()], ids=[tc.id])
         return {
             "content": [{
                 "type": "text",
@@ -490,6 +491,11 @@ def handle_tool(name: str, args: dict) -> dict:
                 added.append(tc)
             except ValueError as e:
                 errors.append(f"第 {i+1} 条：{e}")
+        # 同步到 LightRAG 图谱（批量）
+        if added and mcp_lightrag.is_available():
+            texts = [tc.get_embedding_text() for tc in added]
+            ids = [tc.id for tc in added]
+            mcp_lightrag.insert(texts, ids=ids)
         summary = f"✅ 成功添加 {len(added)} 条"
         if errors:
             summary += f"，{len(errors)} 条失败:\n" + "\n".join(errors)
@@ -551,20 +557,27 @@ def handle_tool(name: str, args: dict) -> dict:
         query = args.get("query", "").strip()
         if not query:
             return {"content": [{"type": "text", "text": "请提供搜索关键词"}]}
-        result = mcp_search_router.search(
+        n_results = min(int(args.get("n_results", 5)), 20)
+        # 两路并行：向量 + 图谱
+        chroma_results = engine.search(
             query=query,
-            n_results=min(int(args.get("n_results", 5)), 20),
+            n_results=n_results,
             module=args.get("module"),
             priority=args.get("priority"),
             category=args.get("category"),
-            mode="auto",
         )
-        text = f"## 🔍 自适应检索「{query}」\n\n模式: {result['mode']}\n\n"
-        for r in result.get("results", []):
-            text += f"**{r['title']}** [{r['score']:.2f}]\n`{r['id']}` | {r['module']} | {r['priority']}\n\n"
-        if result.get("graph_hits"):
-            entities = result["graph_hits"].get("entities", [])
-            if entities:
+        text = f"## 🔍 自适应检索「{query}」\n\n"
+        if chroma_results:
+            text += f"### 📋 向量匹配结果（{len(chroma_results)} 条）\n\n"
+            for r in chroma_results:
+                text += f"**{r['title']}** [{r['score']:.2f}]\n`{r['id']}` | {r['module']} | {r['priority']}\n\n"
+        else:
+            text += "无可用的向量搜索结果\n\n"
+        # 图谱增强
+        if mcp_lightrag.is_available():
+            graph_result = mcp_lightrag.search(query, n_results)
+            if graph_result.get("ok") and graph_result.get("entities"):
+                entities = graph_result["entities"]
                 text += f"### 🕸️ 图谱增强（{len(entities)} 实体）\n"
                 for e in entities[:5]:
                     text += f"- {e['name']}\n"

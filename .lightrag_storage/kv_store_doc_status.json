@@ -1,0 +1,1046 @@
+{
+  "236ff69238d00c3f": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-bff36f7b459f4fca4b79b9dae08c2ecd: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-bff36f7b459f4fca4b79b9dae08c2ecd"
+    ],
+    "content_summary": "标题: 商品搜索-筛选与排序\n模块: 搜索\n子模块: 筛选排序\n优先级: P1\n类别: 功能测试\n前置条件: 搜索结果列表>10条\n步骤: 搜索'手机'; 按价格从低到高排序; 按销量排序; 按品牌筛选'华为'; 按价格区间 3000-5000 筛选\n预期: 排序和筛选条件正确生效，结果数量正确更新，无前端报错\n标签: 搜索, 筛选, 排序\n项目: 电商平台",
+    "content_length": 180,
+    "created_at": "2026-05-19T17:19:43.642933+00:00",
+    "updated_at": "2026-05-19T17:20:01.936413+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011943_018b5275",
+    "metadata": {
+      "processing_start_time": 1779211201,
+      "processing_end_time": 1779211201
+    }
+  },
+  "9d4209d9117d43c6": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-083bd55ceb9c5eae9d32428004a1ef91: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-083bd55ceb9c5eae9d32428004a1ef91"
+    ],
+    "content_summary": "标题: 用户注册-手机号格式验证\n模块: 注册登录\n子模块: 注册\n优先级: P1\n类别: 功能测试\n前置条件: 用户未注册，访问注册页面\n步骤: 输入不符合规范的手机号（11位、非1开头、含字母）; 点击获取验证码按钮\n预期: 提示'请输入正确的手机号'，验证码不发送\n标签: 注册, 手机号, 输入校验\n项目: 电商平台",
+    "content_length": 162,
+    "created_at": "2026-05-19T17:19:43.642606+00:00",
+    "updated_at": "2026-05-19T17:20:01.936337+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011943_018b5275",
+    "metadata": {
+      "processing_start_time": 1779211201,
+      "processing_end_time": 1779211201
+    }
+  },
+  "a6331b6061f23375": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-e8cc9ce7631dcc01ccc162cbc5f909c3: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-e8cc9ce7631dcc01ccc162cbc5f909c3"
+    ],
+    "content_summary": "标题: 购物车-修改商品数量\n模块: 购物车\n子模块: 数量编辑\n优先级: P1\n类别: 功能测试\n前置条件: 购物车中有商品A（1件）\n步骤: 点击数量+按钮增加至3件; 点击数量-按钮减少至0\n预期: 增加至3件后总价正确更新；减至0时弹出确认'是否删除该商品'\n标签: 购物车, 数量, 加减\n项目: 电商平台",
+    "content_length": 158,
+    "created_at": "2026-05-19T17:19:43.642949+00:00",
+    "updated_at": "2026-05-19T17:20:02.531630+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011943_018b5275",
+    "metadata": {
+      "processing_start_time": 1779211201,
+      "processing_end_time": 1779211202
+    }
+  },
+  "50c69df14f9fb1c1": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-47edf9d2075070701f42a818c6cb643d: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-47edf9d2075070701f42a818c6cb643d"
+    ],
+    "content_summary": "标题: 商品搜索-模糊匹配\n模块: 搜索\n子模块: 模糊搜索\n优先级: P0\n类别: 功能测试\n前置条件: 商品库中存在'iPhone 15 Pro Max 512GB'\n步骤: 在搜索框输入'iPhone'; 点击搜索或回车\n预期: 搜索结果中包含'iPhone 15 Pro Max 512GB'及相关商品，结果按相关性排序\n标签: 搜索, 模糊匹配\n项目: 电商平台",
+    "content_length": 186,
+    "created_at": "2026-05-19T17:19:43.642915+00:00",
+    "updated_at": "2026-05-19T17:20:02.613460+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011943_018b5275",
+    "metadata": {
+      "processing_start_time": 1779211201,
+      "processing_end_time": 1779211202
+    }
+  },
+  "a2dc243122e95256": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-eefd5e4a9446248552ebdf2c7bc3c563: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-eefd5e4a9446248552ebdf2c7bc3c563"
+    ],
+    "content_summary": "标题: 用户注册-用户名重复提示\n模块: 注册登录\n子模块: 注册\n优先级: P1\n类别: 功能测试\n前置条件: 已存在用户'test_user'\n步骤: 输入用户名'test_user'; 填写其他有效信息; 提交注册\n预期: 提示'该用户名已被注册'，注册失败\n标签: 注册, 用户名, 重复校验\n项目: 电商平台",
+    "content_length": 159,
+    "created_at": "2026-05-19T17:19:43.642878+00:00",
+    "updated_at": "2026-05-19T17:20:03.129019+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011943_018b5275",
+    "metadata": {
+      "processing_start_time": 1779211202,
+      "processing_end_time": 1779211203
+    }
+  },
+  "6dc3602f3f57023d": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-180859c215a4be88400936048c88df07: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-180859c215a4be88400936048c88df07"
+    ],
+    "content_summary": "标题: 登录-已注册手机号+正确密码\n模块: 注册登录\n子模块: 登录\n优先级: P0\n类别: 功能测试\n前置条件: 已注册用户，手机号13800138000，密码正确\n步骤: 输入已注册手机号; 输入对应正确密码; 点击登录\n预期: 登录成功，跳转至首页，显示用户昵称\n标签: 登录, 正向流程\n项目: 电商平台",
+    "content_length": 157,
+    "created_at": "2026-05-19T17:19:43.642883+00:00",
+    "updated_at": "2026-05-19T17:20:03.213694+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011943_018b5275",
+    "metadata": {
+      "processing_start_time": 1779211202,
+      "processing_end_time": 1779211203
+    }
+  },
+  "18e9d79b917d36e1": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-7e9db8d317e7a8dec44a2d6dc9057077: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-7e9db8d317e7a8dec44a2d6dc9057077"
+    ],
+    "content_summary": "标题: 商品搜索-无结果提示\n模块: 搜索\n子模块: 搜索边界\n优先级: P2\n类别: 功能测试\n前置条件: 商品库中不存在该商品\n步骤: 搜索框输入'xxxxxxxxx不存在商品'; 点击搜索\n预期: 显示'未找到相关商品'，推荐热门商品或分类引导\n标签: 搜索, 无结果, 空数据\n项目: 电商平台",
+    "content_length": 151,
+    "created_at": "2026-05-19T17:19:43.642920+00:00",
+    "updated_at": "2026-05-19T17:20:03.608554+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011943_018b5275",
+    "metadata": {
+      "processing_start_time": 1779211203,
+      "processing_end_time": 1779211203
+    }
+  },
+  "6059f9e50bb33f01": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-d59c290f4ed4117dafc0e1dda4d8a205: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-d59c290f4ed4117dafc0e1dda4d8a205"
+    ],
+    "content_summary": "标题: 购物车-库存不足提示\n模块: 购物车\n子模块: 添加商品\n优先级: P1\n类别: 功能测试\n前置条件: 商品库存仅剩1件\n步骤: 将该商品添加至购物车; 尝试将数量改为10\n预期: 提示'库存不足，最多可购买1件'，数量自动回退到最大库存数\n标签: 购物车, 库存, 边界\n项目: 电商平台",
+    "content_length": 149,
+    "created_at": "2026-05-19T17:19:43.642945+00:00",
+    "updated_at": "2026-05-19T17:20:03.726231+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011943_018b5275",
+    "metadata": {
+      "processing_start_time": 1779211203,
+      "processing_end_time": 1779211203
+    }
+  },
+  "78277b6000401385": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-2604746738934471434d71e65f6d044c: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-2604746738934471434d71e65f6d044c"
+    ],
+    "content_summary": "标题: 用户注册-密码强度校验\n模块: 注册登录\n子模块: 注册\n优先级: P1\n类别: 安全测试\n前置条件: 进入注册页面\n步骤: 输入纯数字密码'123456'; 输入纯字母密码'abcdef'; 输入短密码'a1'; 输入合规密码'Abc@123def'\n预期: 弱密码提示'密码必须包含字母和数字，至少8位'；合规密码通过\n标签: 注册, 密码, 安全\n项目: 电商平台",
+    "content_length": 189,
+    "created_at": "2026-05-19T17:19:43.642874+00:00",
+    "updated_at": "2026-05-19T17:20:04.317120+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011943_018b5275",
+    "metadata": {
+      "processing_start_time": 1779211203,
+      "processing_end_time": 1779211204
+    }
+  },
+  "e513f77a6f104d37": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-3079537ab0eb29fd9352eb08372ec84a: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-3079537ab0eb29fd9352eb08372ec84a"
+    ],
+    "content_summary": "标题: 登录-空密码/空手机号提交\n模块: 注册登录\n子模块: 登录\n优先级: P2\n类别: 功能测试\n前置条件: 登录页面\n步骤: 不输入手机号直接点击登录; 不输入密码直接点击登录; 两个都为空点击登录\n预期: 提示'请输入手机号'和/或'请输入密码'，不发起登录请求\n标签: 登录, 空值校验\n项目: 电商平台",
+    "content_length": 158,
+    "created_at": "2026-05-19T17:19:43.642892+00:00",
+    "updated_at": "2026-05-19T17:20:04.233072+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011943_018b5275",
+    "metadata": {
+      "processing_start_time": 1779211203,
+      "processing_end_time": 1779211204
+    }
+  },
+  "0b9751a685993490": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-fccb61874c41df365cc0407f3935288e: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-fccb61874c41df365cc0407f3935288e"
+    ],
+    "content_summary": "标题: 购物车-删除商品\n模块: 购物车\n子模块: 商品管理\n优先级: P1\n类别: 功能测试\n前置条件: 购物车中至少1件商品\n步骤: 点击商品右侧删除按钮; 确认删除\n预期: 该商品从购物车移除，购物车为空时显示'购物车是空的'引导页\n标签: 购物车, 删除\n项目: 电商平台",
+    "content_length": 140,
+    "created_at": "2026-05-19T17:19:43.642956+00:00",
+    "updated_at": "2026-05-19T17:20:04.744771+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011943_018b5275",
+    "metadata": {
+      "processing_start_time": 1779211204,
+      "processing_end_time": 1779211204
+    }
+  },
+  "b7fa78248477eead": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-1c2dbe424720308081e595bc76ae92fc: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-1c2dbe424720308081e595bc76ae92fc"
+    ],
+    "content_summary": "标题: 购物车-添加商品到购物车\n模块: 购物车\n子模块: 添加商品\n优先级: P0\n类别: 功能测试\n前置条件: 用户已登录，商品详情页\n步骤: 选择商品规格（颜色、尺寸）; 点击'加入购物车'\n预期: 提示'已添加到购物车'，购物车角标数字+1\n标签: 购物车, 添加, 正向\n项目: 电商平台",
+    "content_length": 149,
+    "created_at": "2026-05-19T17:19:43.642937+00:00",
+    "updated_at": "2026-05-19T17:20:04.893112+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011943_018b5275",
+    "metadata": {
+      "processing_start_time": 1779211204,
+      "processing_end_time": 1779211204
+    }
+  },
+  "ba88c089ec700c3f": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-138d57e14d04f9f5c2761ec81394e00f: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-138d57e14d04f9f5c2761ec81394e00f"
+    ],
+    "content_summary": "标题: 登录-密码错误5次账户锁定\n模块: 注册登录\n子模块: 登录\n优先级: P1\n类别: 安全测试\n前置条件: 已注册用户\n步骤: 连续输入错误密码5次; 第5次点击登录; 第6次输入正确密码\n预期: 第5次后提示'密码错误次数过多，账户已锁定，请30分钟后重试'；锁定期间即使正确密码也无法登录\n标签: 登录, 安全, 锁定策略\n项目: 电商平台",
+    "content_length": 176,
+    "created_at": "2026-05-19T17:19:43.642888+00:00",
+    "updated_at": "2026-05-19T17:20:05.250500+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011943_018b5275",
+    "metadata": {
+      "processing_start_time": 1779211204,
+      "processing_end_time": 1779211205
+    }
+  },
+  "c09f3866f6f76b2b": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-4d0fea8c0302c4af3208c162083d8391: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-4d0fea8c0302c4af3208c162083d8391"
+    ],
+    "content_summary": "标题: 登录-记住密码功能\n模块: 注册登录\n子模块: 登录\n优先级: P2\n类别: 功能测试\n前置条件: 已登录过且勾选记住密码\n步骤: 退出登录; 关闭浏览器; 重新打开登录页面\n预期: 手机号和密码自动填充，显示为隐藏字符格式\n标签: 登录, 记住密码, 持久化\n项目: 电商平台",
+    "content_length": 143,
+    "created_at": "2026-05-19T17:19:43.642899+00:00",
+    "updated_at": "2026-05-19T17:20:05.378124+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011943_018b5275",
+    "metadata": {
+      "processing_start_time": 1779211204,
+      "processing_end_time": 1779211205
+    }
+  },
+  "5b1aa74bb734212b": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-b05c770be0daf28898bac7672a41cd80: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-b05c770be0daf28898bac7672a41cd80"
+    ],
+    "content_summary": "标题: 购物车-未登录添加购物车\n模块: 购物车\n子模块: 添加商品\n优先级: P1\n类别: 功能测试\n前置条件: 用户未登录\n步骤: 浏览商品详情页; 点击'加入购物车'\n预期: 跳转至登录页面或弹出登录框\n标签: 购物车, 未登录, 权限\n项目: 电商平台",
+    "content_length": 130,
+    "created_at": "2026-05-19T17:19:43.642941+00:00",
+    "updated_at": "2026-05-19T17:20:05.741030+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011943_018b5275",
+    "metadata": {
+      "processing_start_time": 1779211205,
+      "processing_end_time": 1779211205
+    }
+  },
+  "c5d2fcf731552c06": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-94ec342f6a1655beeda68cd764e2f2d3: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-94ec342f6a1655beeda68cd764e2f2d3"
+    ],
+    "content_summary": "标题: 用户注册-验证码倒计时\n模块: 注册登录\n子模块: 注册\n优先级: P2\n类别: 功能测试\n前置条件: 已输入正确手机号\n步骤: 点击获取验证码; 观察按钮状态变化; 等待60秒后再次点击\n预期: 点击后按钮显示'60s后重新获取'并倒计时，倒计时结束恢复可点击状态\n标签: 注册, 验证码, 倒计时\n项目: 电商平台",
+    "content_length": 163,
+    "created_at": "2026-05-19T17:19:43.642869+00:00",
+    "updated_at": "2026-05-19T17:20:05.876442+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011943_018b5275",
+    "metadata": {
+      "processing_start_time": 1779211205,
+      "processing_end_time": 1779211205
+    }
+  },
+  "a6717ec83ec85f7d": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-7b7044eae7aa135e2f1f49724f4639eb: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-7b7044eae7aa135e2f1f49724f4639eb"
+    ],
+    "content_summary": "标题: 购物车-多商品总价计算\n模块: 购物车\n子模块: 价格计算\n优先级: P0\n类别: 金额测试\n前置条件: 购物车中有商品A¥99×2, 商品B¥199×1, 商品C¥49×3\n步骤: 观察购物车展示的总金额\n预期: 总金额=99*2+199*1+49*3=99*2=198+199+147=544元，金额精确到分，无浮点数误差\n标签: 购物车, 金额, 精度\n项目: 电商平台",
+    "content_length": 192,
+    "created_at": "2026-05-19T17:19:43.642961+00:00",
+    "updated_at": "2026-05-19T17:20:06.232940+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011943_018b5275",
+    "metadata": {
+      "processing_start_time": 1779211205,
+      "processing_end_time": 1779211206
+    }
+  },
+  "33c0ade4379ec4a9": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-0d3505f431b099df644ae42273ee7b0a: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-0d3505f431b099df644ae42273ee7b0a"
+    ],
+    "content_summary": "标题: 商品搜索-特殊字符处理\n模块: 搜索\n子模块: 搜索安全\n优先级: P1\n类别: 安全测试\n前置条件: 搜索功能可用\n步骤: 输入SQL注入语句' OR 1=1 --; 输入XSS脚本'<script>alert(1)</script>'; 输入超长字符串（2000字符）\n预期: 搜索结果为空，不弹出alert，不返回数据库异常信息，超长输入被截断或返回参数错误\n标签: 搜索, 安全, 注入, XSS\n项目: 电商平台",
+    "content_length": 215,
+    "created_at": "2026-05-19T17:19:43.642925+00:00",
+    "updated_at": "2026-05-19T17:20:06.363130+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011943_018b5275",
+    "metadata": {
+      "processing_start_time": 1779211205,
+      "processing_end_time": 1779211206
+    }
+  },
+  "3e385991124399a1": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-c3c03b615d1478b595865b938c393338: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-c3c03b615d1478b595865b938c393338"
+    ],
+    "content_summary": "标题: 商品搜索-拼音搜索\n模块: 搜索\n子模块: 智能搜索\n优先级: P2\n类别: 功能测试\n前置条件: 商品库包含'华为Mate60'\n步骤: 搜索'huawei'; 搜索'hm'; 搜索'华为'\n预期: 三种搜索方式均应命中'华为Mate60'及相关商品\n标签: 搜索, 拼音, 智能\n项目: 电商平台",
+    "content_length": 154,
+    "created_at": "2026-05-19T17:19:43.642929+00:00",
+    "updated_at": "2026-05-19T17:20:06.708917+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011943_018b5275",
+    "metadata": {
+      "processing_start_time": 1779211206,
+      "processing_end_time": 1779211206
+    }
+  },
+  "2a846cdd45bb002c": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-5ecde73d292606942e54eb060087796f: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-5ecde73d292606942e54eb060087796f"
+    ],
+    "content_summary": "标题: 找回密码-通过手机验证码重置\n模块: 注册登录\n子模块: 找回密码\n优先级: P1\n类别: 功能测试\n前置条件: 已注册用户，可接收短信\n步骤: 点击'忘记密码'; 输入已注册手机号; 获取验证码并输入; 设置新密码'New@1234'; 确认新密码; 用新密码登录\n预期: 重置成功，提示'密码已重置'，新密码可正常登录\n标签: 找回密码, 验证码, 流程\n项目: 电商平台",
+    "content_length": 192,
+    "created_at": "2026-05-19T17:19:43.642904+00:00",
+    "updated_at": "2026-05-19T17:20:06.877773+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011943_018b5275",
+    "metadata": {
+      "processing_start_time": 1779211206,
+      "processing_end_time": 1779211206
+    }
+  },
+  "d873a871485ea526": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-a1cd74190205972de5e13c09009883f0: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-a1cd74190205972de5e13c09009883f0"
+    ],
+    "content_summary": "标题: 个人中心-注销账号\n模块: 账号管理\n子模块: 注销\n优先级: P2\n类别: 功能测试\n前置条件: 用户已登录\n步骤: 进入'安全中心-注销账号'; 阅读注销须知; 确认注销; 输入验证码\n预期: 提交注销申请，提示'审核期7天，期间登录可撤回'\n标签: 账号, 注销\n项目: 电商平台",
+    "content_length": 147,
+    "created_at": "2026-05-19T17:19:51.108032+00:00",
+    "updated_at": "2026-05-19T17:20:07.193275+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011951_575825b0",
+    "metadata": {
+      "processing_start_time": 1779211206,
+      "processing_end_time": 1779211207
+    }
+  },
+  "dc46d7d07b57bed5": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-a40759dc70644bcb7795da90993afeeb: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-a40759dc70644bcb7795da90993afeeb"
+    ],
+    "content_summary": "标题: 商品评价-发表评价\n模块: 评价\n子模块: 发布评价\n优先级: P2\n类别: 功能测试\n前置条件: 订单已完成，用户未评价\n步骤: 进入'待评价'列表; 给商品打5星评分; 上传图片评价; 输入评价内容'质量很好！'; 提交\n预期: 评价提交成功，显示'审核通过后展示'，该商品从待评价列表中移除\n标签: 评价, 用户反馈\n项目: 电商平台",
+    "content_length": 174,
+    "created_at": "2026-05-19T17:19:51.107987+00:00",
+    "updated_at": "2026-05-19T17:20:07.422609+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011951_575825b0",
+    "metadata": {
+      "processing_start_time": 1779211206,
+      "processing_end_time": 1779211207
+    }
+  },
+  "aee3f0623f01bc8e": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-aec89be99b089c23e51ba6621b4c59ff: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-aec89be99b089c23e51ba6621b4c59ff"
+    ],
+    "content_summary": "标题: 订单-取消未支付订单\n模块: 订单\n子模块: 订单管理\n优先级: P1\n类别: 功能测试\n前置条件: 有1笔待支付订单\n步骤: 进入订单详情; 点击'取消订单'; 选择取消原因'不想要了'; 确认取消\n预期: 订单状态变为'已取消'，库存恢复，优惠券退回\n标签: 订单, 取消, 退款\n项目: 电商平台",
+    "content_length": 155,
+    "created_at": "2026-05-19T17:19:51.107975+00:00",
+    "updated_at": "2026-05-19T17:20:07.689386+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011951_575825b0",
+    "metadata": {
+      "processing_start_time": 1779211207,
+      "processing_end_time": 1779211207
+    }
+  },
+  "fe0980f8735d972a": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-07f31150279fa0d1d604b7b4e6be5496: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-07f31150279fa0d1d604b7b4e6be5496"
+    ],
+    "content_summary": "标题: 个人中心-修改昵称\n模块: 账号管理\n子模块: 个人信息\n优先级: P2\n类别: 功能测试\n前置条件: 用户已登录\n步骤: 进入'个人中心-个人信息'; 修改昵称为'新昵称123'; 保存\n预期: 昵称更新成功，各处显示新昵称\n标签: 账号, 个人信息, 修改\n项目: 电商平台",
+    "content_length": 143,
+    "created_at": "2026-05-19T17:19:51.108012+00:00",
+    "updated_at": "2026-05-19T17:20:07.847936+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011951_575825b0",
+    "metadata": {
+      "processing_start_time": 1779211207,
+      "processing_end_time": 1779211207
+    }
+  },
+  "589bec1b480470e3": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-f59c968a85971601ca66c13a303d87ab: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-f59c968a85971601ca66c13a303d87ab"
+    ],
+    "content_summary": "标题: 支付-微信支付成功\n模块: 支付\n子模块: 微信支付\n优先级: P0\n类别: 功能测试\n前置条件: 已提交订单，跳转至支付页\n步骤: 选择微信支付; 点击'立即支付'; 扫码或在App确认支付; 支付成功\n预期: 支付成功，跳转至'支付成功'页面，显示支付金额和订单号\n标签: 支付, 微信, 正向\n项目: 电商平台",
+    "content_length": 162,
+    "created_at": "2026-05-19T17:19:51.107907+00:00",
+    "updated_at": "2026-05-19T17:20:08.116363+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011951_575825b0",
+    "metadata": {
+      "processing_start_time": 1779211207,
+      "processing_end_time": 1779211208
+    }
+  },
+  "9ac45a4f2df3f062": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-fd0a1b88bf3430161f2688e09899a9c8: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-fd0a1b88bf3430161f2688e09899a9c8"
+    ],
+    "content_summary": "标题: 支付-余额不足场景\n模块: 支付\n子模块: 支付失败\n优先级: P1\n类别: 异常测试\n前置条件: 余额≤订单金额\n步骤: 选择余额支付; 点击支付\n预期: 提示'余额不足，请选择其他支付方式'，提供切换支付方式的入口\n标签: 支付, 余额不足, 异常\n项目: 电商平台",
+    "content_length": 139,
+    "created_at": "2026-05-19T17:19:51.107920+00:00",
+    "updated_at": "2026-05-19T17:20:08.325409+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011951_575825b0",
+    "metadata": {
+      "processing_start_time": 1779211207,
+      "processing_end_time": 1779211208
+    }
+  },
+  "50a2eb742f9a3da0": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-58c625a3e443ef6a4b321eafa5b35825: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-58c625a3e443ef6a4b321eafa5b35825"
+    ],
+    "content_summary": "标题: 结算-新增收货地址\n模块: 订单\n子模块: 地址管理\n优先级: P2\n类别: 功能测试\n前置条件: 进入结算页\n步骤: 点击'新增地址'; 填写姓名、电话、省市区、详细地址; 设为默认地址; 保存\n预期: 新地址保存成功并被选中为本次收货地址\n标签: 订单, 地址, 新增\n项目: 电商平台",
+    "content_length": 149,
+    "created_at": "2026-05-19T17:19:51.107899+00:00",
+    "updated_at": "2026-05-19T17:20:08.585481+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011951_575825b0",
+    "metadata": {
+      "processing_start_time": 1779211208,
+      "processing_end_time": 1779211208
+    }
+  },
+  "8c96e0774f0a2846": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-58ed31fdcd8ad9f57f687ea47e07db2e: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-58ed31fdcd8ad9f57f687ea47e07db2e"
+    ],
+    "content_summary": "标题: 结算-修改收货地址\n模块: 订单\n子模块: 地址管理\n优先级: P2\n类别: 功能测试\n前置条件: 用户有多个地址\n步骤: 进入结算页; 点击地址区域; 选择另一个地址; 确认\n预期: 收货地址更新为新地址，运费如有差异应同步更新\n标签: 订单, 地址, 切换\n项目: 电商平台",
+    "content_length": 143,
+    "created_at": "2026-05-19T17:19:51.107894+00:00",
+    "updated_at": "2026-05-19T17:20:08.805696+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011951_575825b0",
+    "metadata": {
+      "processing_start_time": 1779211208,
+      "processing_end_time": 1779211208
+    }
+  },
+  "0ce14ee4e751f12e": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-7cc1c274f844afbf0850f3b83ca840e8: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-7cc1c274f844afbf0850f3b83ca840e8"
+    ],
+    "content_summary": "标题: 支付-重复支付拒绝\n模块: 支付\n子模块: 幂等性\n优先级: P1\n类别: 安全测试\n前置条件: 订单已支付成功\n步骤: 回到已支付订单页; 再次点击'去支付'\n预期: 提示'该订单已支付，请勿重复支付'\n标签: 支付, 幂等, 安全\n项目: 电商平台",
+    "content_length": 130,
+    "created_at": "2026-05-19T17:19:51.107928+00:00",
+    "updated_at": "2026-05-19T17:20:09.076606+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011951_575825b0",
+    "metadata": {
+      "processing_start_time": 1779211208,
+      "processing_end_time": 1779211209
+    }
+  },
+  "0dccd904253225a4": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-3dff06c422c4caae2277fd577c86e130: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-3dff06c422c4caae2277fd577c86e130"
+    ],
+    "content_summary": "标题: 商品评价-恶意内容过滤\n模块: 评价\n子模块: 内容审核\n优先级: P1\n类别: 安全测试\n前置条件: 订单已完成\n步骤: 输入含广告/敏感词的评价内容; 提交评价\n预期: 提示'评价内容包含违规信息，请修改后提交'\n标签: 评价, 安全, 内容审核\n项目: 电商平台",
+    "content_length": 138,
+    "created_at": "2026-05-19T17:19:51.108007+00:00",
+    "updated_at": "2026-05-19T17:20:09.275364+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011951_575825b0",
+    "metadata": {
+      "processing_start_time": 1779211208,
+      "processing_end_time": 1779211209
+    }
+  },
+  "73bc2e679300c492": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-752846b9f49bfe366c519923cbf67dc0: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-752846b9f49bfe366c519923cbf67dc0"
+    ],
+    "content_summary": "标题: 订单-物流追踪\n模块: 订单\n子模块: 物流\n优先级: P2\n类别: 功能测试\n前置条件: 订单已发货有物流单号\n步骤: 进入订单详情; 点击'查看物流'\n预期: 展示物流轨迹时间线（已揽收→运输中→派送中→已签收），实时更新\n标签: 订单, 物流, 追踪\n项目: 电商平台",
+    "content_length": 141,
+    "created_at": "2026-05-19T17:19:51.107983+00:00",
+    "updated_at": "2026-05-19T17:20:09.547374+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011951_575825b0",
+    "metadata": {
+      "processing_start_time": 1779211209,
+      "processing_end_time": 1779211209
+    }
+  },
+  "dcfad15c2e644658": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-079a24a8bb389d412368263f748718dc: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-079a24a8bb389d412368263f748718dc"
+    ],
+    "content_summary": "标题: 结算-发票信息填写\n模块: 订单\n子模块: 发票\n优先级: P2\n类别: 功能测试\n前置条件: 结算页面\n步骤: 勾选'需要发票'; 选择'公司'; 输入税号、公司名; 输入发票内容明细\n预期: 发票信息保存，订单详情中显示发票状态为'待开票'\n标签: 订单, 发票, 税务\n项目: 电商平台",
+    "content_length": 150,
+    "created_at": "2026-05-19T17:19:51.107903+00:00",
+    "updated_at": "2026-05-19T17:20:09.781346+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011951_575825b0",
+    "metadata": {
+      "processing_start_time": 1779211209,
+      "processing_end_time": 1779211209
+    }
+  },
+  "6ee59d0541e2bd54": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-73859b8adebdd287d185cdc45aaec1e3: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-73859b8adebdd287d185cdc45aaec1e3"
+    ],
+    "content_summary": "标题: 订单-申请退款\n模块: 订单\n子模块: 售后\n优先级: P1\n类别: 功能测试\n前置条件: 已支付且未发货订单\n步骤: 进入订单详情; 点击'申请退款'; 选择退款原因'拍错了'; 提交申请\n预期: 退款申请提交成功，订单状态变更为'退款处理中'，退款金额原路返回\n标签: 订单, 退款, 售后\n项目: 电商平台",
+    "content_length": 160,
+    "created_at": "2026-05-19T17:19:51.107979+00:00",
+    "updated_at": "2026-05-19T17:20:10.058093+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011951_575825b0",
+    "metadata": {
+      "processing_start_time": 1779211209,
+      "processing_end_time": 1779211210
+    }
+  },
+  "d24f054135d6f36a": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-41354a16cddd3d6382314af347e7d6a0: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-41354a16cddd3d6382314af347e7d6a0"
+    ],
+    "content_summary": "标题: 结算-正常提交订单\n模块: 订单\n子模块: 下单流程\n优先级: P0\n类别: 功能测试\n前置条件: 购物车有商品，已填写收货地址\n步骤: 进入结算页; 确认商品列表和金额; 选择配送方式'标准配送'; 选择支付方式'微信支付'; 点击'提交订单'\n预期: 订单提交成功，生成订单号，跳转至支付页面\n标签: 订单, 结算, 正向流程\n项目: 电商平台",
+    "content_length": 178,
+    "created_at": "2026-05-19T17:19:51.107876+00:00",
+    "updated_at": "2026-05-19T17:20:10.296657+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011951_575825b0",
+    "metadata": {
+      "processing_start_time": 1779211209,
+      "processing_end_time": 1779211210
+    }
+  },
+  "648eb64d41beaead": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-b47400eb4cfe49d36f8d6d6d66898859: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-b47400eb4cfe49d36f8d6d6d66898859"
+    ],
+    "content_summary": "标题: 支付-支付宝支付成功\n模块: 支付\n子模块: 支付宝\n优先级: P0\n类别: 功能测试\n前置条件: 已提交订单\n步骤: 选择支付宝支付; 点击'立即支付'; 跳转至支付宝完成支付\n预期: 支付成功，订单状态变更为'已支付/待发货'\n标签: 支付, 支付宝, 正向\n项目: 电商平台",
+    "content_length": 144,
+    "created_at": "2026-05-19T17:19:51.107916+00:00",
+    "updated_at": "2026-05-19T17:20:10.533754+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011951_575825b0",
+    "metadata": {
+      "processing_start_time": 1779211210,
+      "processing_end_time": 1779211210
+    }
+  },
+  "3beebe782b107340": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-a5b531af8fd1ba48296da61bd741e517: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-a5b531af8fd1ba48296da61bd741e517"
+    ],
+    "content_summary": "标题: 个人中心-修改登录密码\n模块: 账号管理\n子模块: 安全\n优先级: P1\n类别: 安全测试\n前置条件: 用户已登录\n步骤: 进入'安全设置'; 输入旧密码; 输入新密码'NewP@ss789'; 确认新密码; 提交\n预期: 密码修改成功，提示'请重新登录'，旧密码失效\n标签: 账号, 密码, 安全\n项目: 电商平台",
+    "content_length": 162,
+    "created_at": "2026-05-19T17:19:51.108015+00:00",
+    "updated_at": "2026-05-19T17:20:10.776732+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011951_575825b0",
+    "metadata": {
+      "processing_start_time": 1779211210,
+      "processing_end_time": 1779211210
+    }
+  },
+  "dffa3ebe960c5231": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-c3a22678fcb495d25bd4948894f1f8bf: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-c3a22678fcb495d25bd4948894f1f8bf"
+    ],
+    "content_summary": "标题: 支付-支付超时订单取消\n模块: 支付\n子模块: 支付超时\n优先级: P1\n类别: 功能测试\n前置条件: 订单已创建30分钟未支付\n步骤: 等待30分钟; 检查订单状态; 尝试继续支付\n预期: 订单状态变为'已取消'，无法支付，提示'订单已超时取消'\n标签: 支付, 超时, 订单取消\n项目: 电商平台",
+    "content_length": 154,
+    "created_at": "2026-05-19T17:19:51.107924+00:00",
+    "updated_at": "2026-05-19T17:20:11.026890+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011951_575825b0",
+    "metadata": {
+      "processing_start_time": 1779211210,
+      "processing_end_time": 1779211211
+    }
+  },
+  "7c9b95c39a634dbf": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-e71f8fea1bf591c084a6956809efabfb: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-e71f8fea1bf591c084a6956809efabfb"
+    ],
+    "content_summary": "标题: 订单-查看订单详情\n模块: 订单\n子模块: 订单管理\n优先级: P1\n类别: 功能测试\n前置条件: 用户有已完成订单\n步骤: 进入'我的订单'列表; 点击某条订单\n预期: 展示订单详情：商品信息、收货地址、物流单号、支付金额、订单状态时间线\n标签: 订单, 详情, 查询\n项目: 电商平台",
+    "content_length": 148,
+    "created_at": "2026-05-19T17:19:51.107971+00:00",
+    "updated_at": "2026-05-19T17:20:11.271216+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011951_575825b0",
+    "metadata": {
+      "processing_start_time": 1779211210,
+      "processing_end_time": 1779211211
+    }
+  },
+  "0d4d9d7d2b665709": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-3f587960c07767aa845d2337ae86002f: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-3f587960c07767aa845d2337ae86002f"
+    ],
+    "content_summary": "标题: 支付-微信支付取消\n模块: 支付\n子模块: 微信支付\n优先级: P2\n类别: 功能测试\n前置条件: 订单待支付状态\n步骤: 选择微信支付; 点击'立即支付'; 在微信支付界面点击取消\n预期: 支付取消，返回订单页，订单状态仍为'待支付'\n标签: 支付, 微信, 取消\n项目: 电商平台",
+    "content_length": 146,
+    "created_at": "2026-05-19T17:19:51.107912+00:00",
+    "updated_at": "2026-05-19T17:20:11.489981+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011951_575825b0",
+    "metadata": {
+      "processing_start_time": 1779211211,
+      "processing_end_time": 1779211211
+    }
+  },
+  "a211ef84aeb70015": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-ae89fcff1fc59a4c72a56babde14a4a4: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-ae89fcff1fc59a4c72a56babde14a4a4"
+    ],
+    "content_summary": "标题: 购物车-优惠券叠加使用\n模块: 购物车\n子模块: 优惠\n优先级: P1\n类别: 功能测试\n前置条件: 用户有满200减20和满500减50两张优惠券\n步骤: 购物车结算总额¥544; 选择满200减20券; 尝试同时再选满500减50\n预期: 提示'优惠券不可叠加使用'，选择新券后旧券自动取消，优惠金额更新\n标签: 购物车, 优惠券, 叠加\n项目: 电商平台",
+    "content_length": 184,
+    "created_at": "2026-05-19T17:19:51.107864+00:00",
+    "updated_at": "2026-05-19T17:20:11.779447+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_011951_575825b0",
+    "metadata": {
+      "processing_start_time": 1779211211,
+      "processing_end_time": 1779211211
+    }
+  },
+  "14efd66c6c105c76": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-0b2a8196250ffc830d8d2fc9243a0a06: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-0b2a8196250ffc830d8d2fc9243a0a06"
+    ],
+    "content_summary": "标题: 首页-Banner轮播\n模块: 首页\n子模块: Banner\n优先级: P2\n类别: 功能测试\n前置条件: 首页已加载\n步骤: 观察Banner区域; 等待自动轮播; 手动左右滑动切换; 点击Banner\n预期: Banner 3秒自动切换，手动滑动流畅，点击跳转到对应活动页\n标签: 首页, Banner, 轮播\n项目: 电商平台",
+    "content_length": 170,
+    "created_at": "2026-05-19T17:20:01.315296+00:00",
+    "updated_at": "2026-05-19T17:20:12.017335+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_012001_1ed710ce",
+    "metadata": {
+      "processing_start_time": 1779211211,
+      "processing_end_time": 1779211212
+    }
+  },
+  "7c430284fe00b8c3": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-53050937b193ffcc0d92128409feb748: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-53050937b193ffcc0d92128409feb748"
+    ],
+    "content_summary": "标题: 首页-推荐商品加载\n模块: 首页\n子模块: 推荐\n优先级: P1\n类别: 性能测试\n前置条件: 用户已登录\n步骤: 打开App首页; 向下滑动加载更多推荐商品; 连续加载5页\n预期: 推荐商品列表加载流畅，每页最多20条，无闪白/闪烁，总加载时间<3s\n标签: 首页, 推荐, 性能\n项目: 电商平台",
+    "content_length": 154,
+    "created_at": "2026-05-19T17:20:01.315291+00:00",
+    "updated_at": "2026-05-19T17:20:12.280541+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_012001_1ed710ce",
+    "metadata": {
+      "processing_start_time": 1779211211,
+      "processing_end_time": 1779211212
+    }
+  },
+  "f6dd27eabc2a179c": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-6dc05f81ab62ad5278a6a7f37c1c31c6: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-6dc05f81ab62ad5278a6a7f37c1c31c6"
+    ],
+    "content_summary": "标题: 跨平台-断网重连与离线数据\n模块: 兼容性\n子模块: 网络切换\n优先级: P2\n类别: 异常测试\n前置条件: App已打开\n步骤: 浏览商品时切换到飞行模式; 尝试操作（收藏、加购）; 恢复网络\n预期: 断网时显示'网络开小差了'，操作不丢数据，恢复网络后自动同步\n标签: 兼容性, 断网, 离线\n项目: 电商平台",
+    "content_length": 161,
+    "created_at": "2026-05-19T17:20:01.315353+00:00",
+    "updated_at": "2026-05-19T17:20:12.529784+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_012001_1ed710ce",
+    "metadata": {
+      "processing_start_time": 1779211212,
+      "processing_end_time": 1779211212
+    }
+  },
+  "10e557c835d1170d": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-b0784a81a6e1af5931b74037c76ed8d9: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-b0784a81a6e1af5931b74037c76ed8d9"
+    ],
+    "content_summary": "标题: 通知-下单成功推送通知\n模块: 通知\n子模块: 推送\n优先级: P1\n类别: 功能测试\n前置条件: 用户已登录且开启推送权限\n步骤: 完成一笔订单支付; 退到后台等待\n预期: 收到推送通知'订单支付成功！您的订单已确认'\n标签: 通知, 推送, 订单\n项目: 电商平台",
+    "content_length": 138,
+    "created_at": "2026-05-19T17:20:01.315308+00:00",
+    "updated_at": "2026-05-19T17:20:12.784602+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_012001_1ed710ce",
+    "metadata": {
+      "processing_start_time": 1779211212,
+      "processing_end_time": 1779211212
+    }
+  },
+  "f75c5a8b6800e61c": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-80c4326fff5d2dfded4853c5a4cc2a3c: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-80c4326fff5d2dfded4853c5a4cc2a3c"
+    ],
+    "content_summary": "标题: 秒杀-库存为0时显示已售罄\n模块: 秒杀\n子模块: 库存\n优先级: P1\n类别: 功能测试\n前置条件: 秒杀商品库存已为0\n步骤: 进入秒杀活动页; 观察售罄商品\n预期: 该商品显示'已售罄'标签，购买按钮置灰不可点击\n标签: 秒杀, 库存, 限时\n项目: 电商平台",
+    "content_length": 137,
+    "created_at": "2026-05-19T17:20:01.315300+00:00",
+    "updated_at": "2026-05-19T17:20:13.021516+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_012001_1ed710ce",
+    "metadata": {
+      "processing_start_time": 1779211212,
+      "processing_end_time": 1779211213
+    }
+  },
+  "15aabefb32b13ac4": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-3b98fc7280afe4f86c6fa8278e41dc74: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-3b98fc7280afe4f86c6fa8278e41dc74"
+    ],
+    "content_summary": "标题: 秒杀-同时下单库存扣减\n模块: 秒杀\n子模块: 并发\n优先级: P0\n类别: 性能测试\n前置条件: 秒杀商品库存100件\n步骤: 模拟500个用户同时抢购; 检查最终成功订单数; 检查数据库库存扣减\n预期: 成功订单数≤100，不超卖，库存准确归0\n标签: 秒杀, 并发, 超卖\n项目: 电商平台",
+    "content_length": 152,
+    "created_at": "2026-05-19T17:20:01.315304+00:00",
+    "updated_at": "2026-05-19T17:20:13.337163+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_012001_1ed710ce",
+    "metadata": {
+      "processing_start_time": 1779211212,
+      "processing_end_time": 1779211213
+    }
+  },
+  "e12673ec8d14ec4f": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-3deb72cbf2cdd52b45748509f13a059f: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-3deb72cbf2cdd52b45748509f13a059f"
+    ],
+    "content_summary": "标题: 商品收藏-添加/取消收藏\n模块: 收藏\n子模块: 商品收藏\n优先级: P2\n类别: 功能测试\n前置条件: 用户已登录，商品详情页\n步骤: 点击商品页的'收藏'图标（心形）; 再次点击\n预期: 首次点击心形变红/实心，收藏数量+1；再次点击取消收藏，心形变回空心\n标签: 收藏, 商品, 交互\n项目: 电商平台",
+    "content_length": 158,
+    "created_at": "2026-05-19T17:20:01.315279+00:00",
+    "updated_at": "2026-05-19T17:20:13.547841+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_012001_1ed710ce",
+    "metadata": {
+      "processing_start_time": 1779211213,
+      "processing_end_time": 1779211213
+    }
+  },
+  "c1f9ccebe1f00987": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-6ce3515c9f569d706f64ec8c6d15e70d: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-6ce3515c9f569d706f64ec8c6d15e70d"
+    ],
+    "content_summary": "标题: API-Rate Limiting频率限制\n模块: API测试\n子模块: 限流\n优先级: P1\n类别: 安全测试\n前置条件: 限流规则：每IP每分钟100次\n步骤: 同一IP在1秒内发送120次请求\n预期: 第101次开始返回429 Too Many Requests，响应头包含Retry-After\n标签: API, 限流, 安全\n项目: 电商平台",
+    "content_length": 180,
+    "created_at": "2026-05-19T17:20:01.315336+00:00",
+    "updated_at": "2026-05-19T17:20:13.886468+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_012001_1ed710ce",
+    "metadata": {
+      "processing_start_time": 1779211213,
+      "processing_end_time": 1779211213
+    }
+  },
+  "ea3a2d0f0593cc58": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-1b6a8b00e319750bedf36eec9491b9e3: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-1b6a8b00e319750bedf36eec9491b9e3"
+    ],
+    "content_summary": "标题: 跨平台-微信小程序兼容\n模块: 兼容性\n子模块: 小程序\n优先级: P1\n类别: 兼容性测试\n前置条件: 微信小程序环境\n步骤: 在微信小程序中打开商城; 完成浏览-加购-下单-支付全流程\n预期: 所有功能正常运行，页面适配小程序屏幕，调用小程序原生支付\n标签: 兼容性, 小程序, 微信\n项目: 电商平台",
+    "content_length": 157,
+    "created_at": "2026-05-19T17:20:01.315349+00:00",
+    "updated_at": "2026-05-19T17:20:14.035317+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_012001_1ed710ce",
+    "metadata": {
+      "processing_start_time": 1779211213,
+      "processing_end_time": 1779211214
+    }
+  },
+  "55dde6dbd9c22e18": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-482273c633b5905dcf8521f4fa75e242: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-482273c633b5905dcf8521f4fa75e242"
+    ],
+    "content_summary": "标题: 跨平台-移动端登录态同步\n模块: 兼容性\n子模块: 多端同步\n优先级: P2\n类别: 兼容性测试\n前置条件: 账号在手机App登录\n步骤: 同一账号PC浏览器登录; 在App中修改昵称; 刷新PC页面\n预期: PC端显示更新后的昵称，两边登录态互不踢出\n标签: 兼容性, 多端, 同步\n项目: 电商平台",
+    "content_length": 155,
+    "created_at": "2026-05-19T17:20:01.315345+00:00",
+    "updated_at": "2026-05-19T17:20:14.383306+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_012001_1ed710ce",
+    "metadata": {
+      "processing_start_time": 1779211213,
+      "processing_end_time": 1779211214
+    }
+  },
+  "3ad6aaddc0399c36": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-b9865fce8a8163350c64951fcab260ab: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-b9865fce8a8163350c64951fcab260ab"
+    ],
+    "content_summary": "标题: 优惠券-领取与过期\n模块: 营销\n子模块: 优惠券\n优先级: P2\n类别: 功能测试\n前置条件: 有可用优惠券活动\n步骤: 进入领券中心领取优惠券; 查看'我的优惠券'列表; 查看已过期优惠券列表\n预期: 领取成功显示在'我的优惠券'中，过期券自动移至'已过期'且不能使用\n标签: 营销, 优惠券, 领取\n项目: 电商平台",
+    "content_length": 165,
+    "created_at": "2026-05-19T17:20:01.315313+00:00",
+    "updated_at": "2026-05-19T17:20:14.522043+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_012001_1ed710ce",
+    "metadata": {
+      "processing_start_time": 1779211214,
+      "processing_end_time": 1779211214
+    }
+  },
+  "64f9ba17fb9ba406": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-7424b45650c54e39f66a4ebfcec49b51: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-7424b45650c54e39f66a4ebfcec49b51"
+    ],
+    "content_summary": "标题: 安全-敏感信息泄露检测\n模块: 安全测试\n子模块: 信息泄露\n优先级: P0\n类别: 安全测试\n前置条件: 用户已登录\n步骤: 查看个人信息API返回; 检查订单API返回中的手机号格式\n预期: 手机号展示为138****0000，身份证展示为110***********1234，不返回完整敏感信息\n标签: 安全, 隐私, 脱敏\n项目: 电商平台",
+    "content_length": 178,
+    "created_at": "2026-05-19T17:20:01.315361+00:00",
+    "updated_at": "2026-05-19T17:20:14.924364+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_012001_1ed710ce",
+    "metadata": {
+      "processing_start_time": 1779211214,
+      "processing_end_time": 1779211214
+    }
+  },
+  "de3e628c285ffa58": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-f9f36686e78c014c19633c14dc1ca8fd: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-f9f36686e78c014c19633c14dc1ca8fd"
+    ],
+    "content_summary": "标题: API-下单接口幂等性\n模块: API测试\n子模块: 幂等\n优先级: P1\n类别: 安全测试\n前置条件: 下单API可用\n步骤: 使用相同幂等键(idempotent-key:ABC123)发送两次下单请求\n预期: 第一次返回201 Created，第二次返回200 OK+相同订单号，不生成重复订单\n标签: API, 幂等, 下单\n项目: 电商平台",
+    "content_length": 179,
+    "created_at": "2026-05-19T17:20:01.315321+00:00",
+    "updated_at": "2026-05-19T17:20:15.055210+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_012001_1ed710ce",
+    "metadata": {
+      "processing_start_time": 1779211214,
+      "processing_end_time": 1779211215
+    }
+  },
+  "11cb24f646fb9b71": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-614c6749808d720e76787cdaaf64d0f3: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-614c6749808d720e76787cdaaf64d0f3"
+    ],
+    "content_summary": "标题: 安全-CSRF跨站请求伪造防护\n模块: 安全测试\n子模块: CSRF\n优先级: P1\n类别: 安全测试\n前置条件: 用户已登录\n步骤: 构造恶意页面，自动向商城API发起POST修改密码请求\n预期: 请求因缺少CSRF Token被拒绝，返回403 Forbidden\n标签: 安全, CSRF, 防护\n项目: 电商平台",
+    "content_length": 164,
+    "created_at": "2026-05-19T17:20:01.315357+00:00",
+    "updated_at": "2026-05-19T17:20:15.462159+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_012001_1ed710ce",
+    "metadata": {
+      "processing_start_time": 1779211214,
+      "processing_end_time": 1779211215
+    }
+  },
+  "d9255f68e21a455d": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-c727f8a78c17ec1ee306b41098d3c64f: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-c727f8a78c17ec1ee306b41098d3c64f"
+    ],
+    "content_summary": "标题: 安全-暴力破解登录防护\n模块: 安全测试\n子模块: 暴力破解\n优先级: P0\n类别: 安全测试\n前置条件: 攻击者/用户尝试暴力破解\n步骤: 同一IP使用不同密码尝试登录同一账号10次; 第6次输入正确密码\n预期: 连续5次失败后显示验证码，10次后锁定IP 1小时\n标签: 安全, 暴力破解, 登录\n项目: 电商平台",
+    "content_length": 163,
+    "created_at": "2026-05-19T17:20:01.315365+00:00",
+    "updated_at": "2026-05-19T17:20:15.596104+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_012001_1ed710ce",
+    "metadata": {
+      "processing_start_time": 1779211215,
+      "processing_end_time": 1779211215
+    }
+  },
+  "86568061f8db6ecb": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-23f0060643bb1368319afcc4fc5901b2: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-23f0060643bb1368319afcc4fc5901b2"
+    ],
+    "content_summary": "标题: API-Token过期处理\n模块: API测试\n子模块: 鉴权\n优先级: P1\n类别: 安全测试\n前置条件: 用户的access_token已过期\n步骤: 使用过期Token调用/api/user/profile; 检查返回结果\n预期: 返回401 Unauthorized + 'token_expired'，客户端应使用refresh_token自动续期\n标签: API, 鉴权, Token\n项目: 电商平台",
+    "content_length": 211,
+    "created_at": "2026-05-19T17:20:01.315326+00:00",
+    "updated_at": "2026-05-19T17:20:16.036249+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_012001_1ed710ce",
+    "metadata": {
+      "processing_start_time": 1779211215,
+      "processing_end_time": 1779211216
+    }
+  },
+  "7beb05cb3f528af6": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-71940fc48b58c834abad1727c80f1d53: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-71940fc48b58c834abad1727c80f1d53"
+    ],
+    "content_summary": "标题: API-库存接口高并发压测\n模块: API测试\n子模块: 性能\n优先级: P1\n类别: 性能测试\n前置条件: 库存查询API正常运行\n步骤: 使用wrk/ab发送1000并发请求到/api/inventory/query; 持续30秒; 观察响应时间和错误率\n预期: QPS≥500，P99延迟<500ms，错误率<0.1%\n标签: API, 性能, 并发\n项目: 电商平台",
+    "content_length": 191,
+    "created_at": "2026-05-19T17:20:01.315317+00:00",
+    "updated_at": "2026-05-19T17:20:16.152037+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_012001_1ed710ce",
+    "metadata": {
+      "processing_start_time": 1779211215,
+      "processing_end_time": 1779211216
+    }
+  },
+  "27f390a30bfdf738": {
+    "status": "failed",
+    "error_msg": "C[1/1]: chunk-171ace798373ec6fea7f798c0cfacff8: AuthenticationError: Authentication Fails (governor)",
+    "chunks_count": 1,
+    "chunks_list": [
+      "chunk-171ace798373ec6fea7f798c0cfacff8"
+    ],
+    "content_summary": "标题: API-参数校验-商品ID不存在\n模块: API测试\n子模块: 参数校验\n优先级: P2\n类别: 功能测试\n前置条件: API服务正常\n步骤: 请求GET /api/product/detail?id=9999999（不存在的ID）\n预期: 返回404 Not Found + '商品不存在'，不返回空数据或无响应的白页\n标签: API, 参数校验, 异常\n项目: 电商平台",
+    "content_length": 191,
+    "created_at": "2026-05-19T17:20:01.315331+00:00",
+    "updated_at": "2026-05-19T17:20:16.477832+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20260520_012001_1ed710ce",
+    "metadata": {
+      "processing_start_time": 1779211216,
+      "processing_end_time": 1779211216
+    }
+  }
+}

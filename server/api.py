@@ -419,10 +419,9 @@ def _mcp_handle_tc_add_batch(args: dict) -> dict:
 MCP_TOOLS = [
     {
         "name": "tc_search",
-        "description": "语义搜索测试用例，返回最匹配的结果。支持按 module（父模块）和 sub_module（子模块/测试点）精确筛选。"
-            "【检索策略】如果首轮结果不够理想（得分低或数量不足），请尝试用不同的关键词或更简洁/更具体的表述再次搜索。"
-            "支持多轮检索：先用宽泛关键词查，再逐步精化。"
-            "也可以先调 tc_project_types 了解项目类型和模块分布后再搜索。",
+        "description": "基础语义搜索（ChromaDB + BM25 向量引擎），快速返回最匹配的测试用例。支持按 module/sub_module/priority/category 精确筛选。"
+            "【使用流程】① 先调 tc_project_types 了解项目分布 → ② 用本工具做关键词搜索 → ③ 得分低或结果不够时，换关键词精化，或改调 tc_agentic_search 自动融合图谱增强。"
+            "需要跨模块关联推理时，请用 tc_graph_search",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -437,7 +436,7 @@ MCP_TOOLS = [
     },
     {
         "name": "tc_list",
-        "description": "列出测试用例（支持按模块/优先级/类别筛选和分页）",
+        "description": "浏览测试用例列表（支持按 module/sub_module/priority/category 筛选和分页）。想查具体某条详情请用 tc_get；想做语义搜索请用 tc_search 或 tc_agentic_search",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -451,7 +450,7 @@ MCP_TOOLS = [
     },
     {
         "name": "tc_get",
-        "description": "按 ID 获取测试用例的完整内容",
+        "description": "按 ID 获取测试用例的完整内容（包含 steps/expected/tags 等全部字段）。如果不知道 ID，先调 tc_search / tc_list 找到目标用例",
         "inputSchema": {
             "type": "object",
             "properties": {"id": {"type": "string", "description": "用例 ID"}},
@@ -460,12 +459,15 @@ MCP_TOOLS = [
     },
     {
         "name": "tc_stats",
-        "description": "获取知识库统计信息（总数、模块分布、优先级分布）",
+        "description": "获取知识库统计信息（总数、模块分布、优先级分布、类别分布）。先调此工具了解整体规模和数据覆盖情况，再决定后续搜索策略",
         "inputSchema": {"type": "object", "properties": {}},
     },
     {
         "name": "tc_project_types",
-        "description": "获取已录入的所有项目类型列表（去重排序）。在调用 tc_add / tc_add_batch 前应先查询本接口，了解已有的项目类型后再填写 project 字段，确保数据一致性",
+        "description": "获取已录入的所有项目类型列表（去重排序，含各类型下的模块分布）。"
+            "【使用场景】① 添加用例前：先查已有类型再填 project 字段，保持数据一致性。"
+            "② 检索用例前：了解模块和项目分布，帮助构建更精准的搜索关键词。"
+            "③ 需要查看特定项目下的子模块（sub_module）结构时，可结合 tc_list 进一步浏览",
         "inputSchema": {
             "type": "object",
             "properties": {},
@@ -474,7 +476,9 @@ MCP_TOOLS = [
     },
     {
         "name": "tc_add",
-        "description": "【重要】添加前先调用 tc_project_types 查询已有项目类型，统一使用已有的类型名。添加一条新的测试用例到知识库（自动清洗输入：去换行、trim、过滤空元素）。注意：project 为项目类型（如 slot游戏/后台/活动），空则留空，不再默认取 module",
+        "description": "【重要】添加前先调用 tc_project_types 查询已有项目类型。添加单条测试用例。"
+            "自动清洗规则：标题/模块必填非空；project 为项目类型（如 slot游戏/后台/活动），空则留空；priority→P3；category→功能测试；creator→MCP；steps/tags 空元素自动过滤；所有文本 trim+合并换行空白。"
+            "⚠️ 添加后自动同步写入 LightRAG 知识图谱（如已启用），后续可用 tc_graph_search 检索新用例的实体关系",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -494,7 +498,9 @@ MCP_TOOLS = [
     },
     {
         "name": "tc_add_batch",
-        "description": "【重要】添加前先调用 tc_project_types 查询已有项目类型，统一使用已有的类型名。批量添加测试用例（自动清洗每条）。传入 cases 数组，每条结构和 tc_add 一致",
+        "description": "【重要】添加前先调用 tc_project_types 查询已有项目类型。批量添加测试用例（逐条清洗，单条失败不阻塞整体）。清洗规则同 tc_add。"
+            "返回成功/失败统计和模块分布。"
+            "⚠️ 添加后自动同步写入 LightRAG 知识图谱（如已启用），后续可用 tc_graph_search 检索新用例的实体关系",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -524,7 +530,8 @@ MCP_TOOLS = [
     },
     {
         "name": "tc_delete",
-        "description": "删除测试用例。支持两种模式：按 ID 删除单条，或按 module/project 批量删除。注意批量删除不可撤销",
+        "description": "删除测试用例。支持两种模式：按 ID 删除单条，或按 module/project 批量删除。注意批量删除不可撤销。"
+            "⚠️ 删除不同步清除 LightRAG 知识图谱中的对应实体关系；如需完整重建图谱，请调 tc_graph_status 确认图谱存在后再手动重建",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -537,11 +544,11 @@ MCP_TOOLS = [
     },
     {
         "name": "tc_graph_search",
-        "description": "【需 LightRAG 启用】知识图谱检索，通过实体-关系图找到与查询相关的概念和用例。"
-            "适合跨模块关联查询、多跳推理（如'扣费模块和哪些项目有关'）。"
-            "返回实体列表、关系列表和关联文本片段。"
-            "如果返回为空，尝试简化查询词或调 tc_graph_status 查看图谱是否已有数据。"
-            "【先调 tc_project_types 了解项目分布，再结合 tc_search 走向量检索作为补充】",
+        "description": "【需 LightRAG 启用】知识图谱检索——通过实体-关系图做跨模块关联推理。"
+            "适用场景：① 跨模块关联查询（如'扣费模块关联哪些模块'）② 多跳推理（'某条用例和哪些项目相关'）③ 概念关系发现。"
+            "返回：实体列表、关系列表、关联文本片段。"
+            "【使用提示】调 tc_graph_status 确认图谱就绪后再使用。如果结果为空洞，尝试简化查询词。"
+            "需要完整用例内容时，用找到的实体名配合 tc_search 或 tc_agentic_search 做向量检索",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -560,11 +567,10 @@ MCP_TOOLS = [
     },
     {
         "name": "tc_agentic_search",
-        "description": "【推荐】自适应智能检索——自动决定检索策略。"
-            "先走向量搜索（语义匹配），再用知识图谱（实体关系）增强结果。"
+        "description": "【推荐】自适应检索——自动融合向量搜索 + 知识图谱增强。先走 ChromaDB 做语义匹配，再调用 LightRAG 图谱补充实体关系。"
             "如果图谱不可用，自动降级为纯向量搜索。"
-            "适合复杂问题、不确定怎么搜的场景。"
-            "返回: 向量命中的用例列表 +（如有图谱）关联实体和关系。",
+            "适用场景：① 复杂问题不确定怎么精确表达关键词 ② 需要同时看语义匹配结果和相关实体关系 ③ tc_search 首轮结果不够理想时的深入检索。"
+            "如果只想要纯向量快速匹配，用 tc_search。需要纯图谱推理，用 tc_graph_search",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -595,8 +601,8 @@ MCP_TOOLS = [
     },
     {
         "name": "tc_graph_status",
-        "description": "查看知识图谱（LightRAG）的运行状态：是否启用、是否已建图、实体数量、LLM 提供商等。"
-            "如果 tc_graph_search 没有返回结果，先调此工具诊断。",
+        "description": "诊断 LightRAG 知识图谱状态：是否启用、是否已建图、实体数量、LLM 提供商、处理状态等。"
+            "使用场景：① tc_graph_search 无结果时先调此工具诊断 ② 确认图谱就绪后再做图谱检索 ③ 建图过程中查看处理进度",
         "inputSchema": {
             "type": "object",
             "properties": {},

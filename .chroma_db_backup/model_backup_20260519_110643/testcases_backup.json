@@ -1,0 +1,1263 @@
+[
+  {
+    "title": "用户注册-手机号格式验证",
+    "module": "注册登录",
+    "sub_module": "注册",
+    "priority": "P1",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "注册",
+      "手机号",
+      "输入校验"
+    ],
+    "steps": [
+      "输入不符合规范的手机号（11位、非1开头、含字母）",
+      "点击获取验证码按钮"
+    ],
+    "preconditions": "用户未注册，访问注册页面",
+    "expected": "提示'请输入正确的手机号'，验证码不发送"
+  },
+  {
+    "title": "用户注册-验证码倒计时",
+    "module": "注册登录",
+    "sub_module": "注册",
+    "priority": "P2",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "注册",
+      "验证码",
+      "倒计时"
+    ],
+    "steps": [
+      "点击获取验证码",
+      "观察按钮状态变化",
+      "等待60秒后再次点击"
+    ],
+    "preconditions": "已输入正确手机号",
+    "expected": "点击后按钮显示'60s后重新获取'并倒计时，倒计时结束恢复可点击状态"
+  },
+  {
+    "title": "用户注册-密码强度校验",
+    "module": "注册登录",
+    "sub_module": "注册",
+    "priority": "P1",
+    "category": "安全测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "注册",
+      "密码",
+      "安全"
+    ],
+    "steps": [
+      "输入纯数字密码'123456'",
+      "输入纯字母密码'abcdef'",
+      "输入短密码'a1'",
+      "输入合规密码'Abc@123def'"
+    ],
+    "preconditions": "进入注册页面",
+    "expected": "弱密码提示'密码必须包含字母和数字，至少8位'；合规密码通过"
+  },
+  {
+    "title": "用户注册-用户名重复提示",
+    "module": "注册登录",
+    "sub_module": "注册",
+    "priority": "P1",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "注册",
+      "用户名",
+      "重复校验"
+    ],
+    "steps": [
+      "输入用户名'test_user'",
+      "填写其他有效信息",
+      "提交注册"
+    ],
+    "preconditions": "已存在用户'test_user'",
+    "expected": "提示'该用户名已被注册'，注册失败"
+  },
+  {
+    "title": "登录-已注册手机号+正确密码",
+    "module": "注册登录",
+    "sub_module": "登录",
+    "priority": "P0",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "登录",
+      "正向流程"
+    ],
+    "steps": [
+      "输入已注册手机号",
+      "输入对应正确密码",
+      "点击登录"
+    ],
+    "preconditions": "已注册用户，手机号13800138000，密码正确",
+    "expected": "登录成功，跳转至首页，显示用户昵称"
+  },
+  {
+    "title": "登录-密码错误5次账户锁定",
+    "module": "注册登录",
+    "sub_module": "登录",
+    "priority": "P1",
+    "category": "安全测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "登录",
+      "安全",
+      "锁定策略"
+    ],
+    "steps": [
+      "连续输入错误密码5次",
+      "第5次点击登录",
+      "第6次输入正确密码"
+    ],
+    "preconditions": "已注册用户",
+    "expected": "第5次后提示'密码错误次数过多，账户已锁定，请30分钟后重试'；锁定期间即使正确密码也无法登录"
+  },
+  {
+    "title": "登录-空密码/空手机号提交",
+    "module": "注册登录",
+    "sub_module": "登录",
+    "priority": "P2",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "登录",
+      "空值校验"
+    ],
+    "steps": [
+      "不输入手机号直接点击登录",
+      "不输入密码直接点击登录",
+      "两个都为空点击登录"
+    ],
+    "preconditions": "登录页面",
+    "expected": "提示'请输入手机号'和/或'请输入密码'，不发起登录请求"
+  },
+  {
+    "title": "登录-记住密码功能",
+    "module": "注册登录",
+    "sub_module": "登录",
+    "priority": "P2",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "登录",
+      "记住密码",
+      "持久化"
+    ],
+    "steps": [
+      "退出登录",
+      "关闭浏览器",
+      "重新打开登录页面"
+    ],
+    "preconditions": "已登录过且勾选记住密码",
+    "expected": "手机号和密码自动填充，显示为隐藏字符格式"
+  },
+  {
+    "title": "找回密码-通过手机验证码重置",
+    "module": "注册登录",
+    "sub_module": "找回密码",
+    "priority": "P1",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "找回密码",
+      "验证码",
+      "流程"
+    ],
+    "steps": [
+      "点击'忘记密码'",
+      "输入已注册手机号",
+      "获取验证码并输入",
+      "设置新密码'New@1234'",
+      "确认新密码",
+      "用新密码登录"
+    ],
+    "preconditions": "已注册用户，可接收短信",
+    "expected": "重置成功，提示'密码已重置'，新密码可正常登录"
+  },
+  {
+    "title": "商品搜索-模糊匹配",
+    "module": "搜索",
+    "sub_module": "模糊搜索",
+    "priority": "P0",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "搜索",
+      "模糊匹配"
+    ],
+    "steps": [
+      "在搜索框输入'iPhone'",
+      "点击搜索或回车"
+    ],
+    "preconditions": "商品库中存在'iPhone 15 Pro Max 512GB'",
+    "expected": "搜索结果中包含'iPhone 15 Pro Max 512GB'及相关商品，结果按相关性排序"
+  },
+  {
+    "title": "商品搜索-无结果提示",
+    "module": "搜索",
+    "sub_module": "搜索边界",
+    "priority": "P2",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "搜索",
+      "无结果",
+      "空数据"
+    ],
+    "steps": [
+      "搜索框输入'xxxxxxxxx不存在商品'",
+      "点击搜索"
+    ],
+    "preconditions": "商品库中不存在该商品",
+    "expected": "显示'未找到相关商品'，推荐热门商品或分类引导"
+  },
+  {
+    "title": "商品搜索-特殊字符处理",
+    "module": "搜索",
+    "sub_module": "搜索安全",
+    "priority": "P1",
+    "category": "安全测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "搜索",
+      "安全",
+      "注入",
+      "XSS"
+    ],
+    "steps": [
+      "输入SQL注入语句' OR 1=1 --",
+      "输入XSS脚本'<script>alert(1)</script>'",
+      "输入超长字符串（2000字符）"
+    ],
+    "preconditions": "搜索功能可用",
+    "expected": "搜索结果为空，不弹出alert，不返回数据库异常信息，超长输入被截断或返回参数错误"
+  },
+  {
+    "title": "商品搜索-拼音搜索",
+    "module": "搜索",
+    "sub_module": "智能搜索",
+    "priority": "P2",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "搜索",
+      "拼音",
+      "智能"
+    ],
+    "steps": [
+      "搜索'huawei'",
+      "搜索'hm'",
+      "搜索'华为'"
+    ],
+    "preconditions": "商品库包含'华为Mate60'",
+    "expected": "三种搜索方式均应命中'华为Mate60'及相关商品"
+  },
+  {
+    "title": "商品搜索-筛选与排序",
+    "module": "搜索",
+    "sub_module": "筛选排序",
+    "priority": "P1",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "搜索",
+      "筛选",
+      "排序"
+    ],
+    "steps": [
+      "搜索'手机'",
+      "按价格从低到高排序",
+      "按销量排序",
+      "按品牌筛选'华为'",
+      "按价格区间 3000-5000 筛选"
+    ],
+    "preconditions": "搜索结果列表>10条",
+    "expected": "排序和筛选条件正确生效，结果数量正确更新，无前端报错"
+  },
+  {
+    "title": "购物车-添加商品到购物车",
+    "module": "购物车",
+    "sub_module": "添加商品",
+    "priority": "P0",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "购物车",
+      "添加",
+      "正向"
+    ],
+    "steps": [
+      "选择商品规格（颜色、尺寸）",
+      "点击'加入购物车'"
+    ],
+    "preconditions": "用户已登录，商品详情页",
+    "expected": "提示'已添加到购物车'，购物车角标数字+1"
+  },
+  {
+    "title": "购物车-未登录添加购物车",
+    "module": "购物车",
+    "sub_module": "添加商品",
+    "priority": "P1",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "购物车",
+      "未登录",
+      "权限"
+    ],
+    "steps": [
+      "浏览商品详情页",
+      "点击'加入购物车'"
+    ],
+    "preconditions": "用户未登录",
+    "expected": "跳转至登录页面或弹出登录框"
+  },
+  {
+    "title": "购物车-库存不足提示",
+    "module": "购物车",
+    "sub_module": "添加商品",
+    "priority": "P1",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "购物车",
+      "库存",
+      "边界"
+    ],
+    "steps": [
+      "将该商品添加至购物车",
+      "尝试将数量改为10"
+    ],
+    "preconditions": "商品库存仅剩1件",
+    "expected": "提示'库存不足，最多可购买1件'，数量自动回退到最大库存数"
+  },
+  {
+    "title": "购物车-修改商品数量",
+    "module": "购物车",
+    "sub_module": "数量编辑",
+    "priority": "P1",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "购物车",
+      "数量",
+      "加减"
+    ],
+    "steps": [
+      "点击数量+按钮增加至3件",
+      "点击数量-按钮减少至0"
+    ],
+    "preconditions": "购物车中有商品A（1件）",
+    "expected": "增加至3件后总价正确更新；减至0时弹出确认'是否删除该商品'"
+  },
+  {
+    "title": "购物车-删除商品",
+    "module": "购物车",
+    "sub_module": "商品管理",
+    "priority": "P1",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "购物车",
+      "删除"
+    ],
+    "steps": [
+      "点击商品右侧删除按钮",
+      "确认删除"
+    ],
+    "preconditions": "购物车中至少1件商品",
+    "expected": "该商品从购物车移除，购物车为空时显示'购物车是空的'引导页"
+  },
+  {
+    "title": "购物车-多商品总价计算",
+    "module": "购物车",
+    "sub_module": "价格计算",
+    "priority": "P0",
+    "category": "金额测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "购物车",
+      "金额",
+      "精度"
+    ],
+    "steps": [
+      "观察购物车展示的总金额"
+    ],
+    "preconditions": "购物车中有商品A¥99×2, 商品B¥199×1, 商品C¥49×3",
+    "expected": "总金额=99*2+199*1+49*3=99*2=198+199+147=544元，金额精确到分，无浮点数误差"
+  },
+  {
+    "title": "购物车-优惠券叠加使用",
+    "module": "购物车",
+    "sub_module": "优惠",
+    "priority": "P1",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "购物车",
+      "优惠券",
+      "叠加"
+    ],
+    "steps": [
+      "购物车结算总额¥544",
+      "选择满200减20券",
+      "尝试同时再选满500减50"
+    ],
+    "preconditions": "用户有满200减20和满500减50两张优惠券",
+    "expected": "提示'优惠券不可叠加使用'，选择新券后旧券自动取消，优惠金额更新"
+  },
+  {
+    "title": "结算-正常提交订单",
+    "module": "订单",
+    "sub_module": "下单流程",
+    "priority": "P0",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "订单",
+      "结算",
+      "正向流程"
+    ],
+    "steps": [
+      "进入结算页",
+      "确认商品列表和金额",
+      "选择配送方式'标准配送'",
+      "选择支付方式'微信支付'",
+      "点击'提交订单'"
+    ],
+    "preconditions": "购物车有商品，已填写收货地址",
+    "expected": "订单提交成功，生成订单号，跳转至支付页面"
+  },
+  {
+    "title": "结算-修改收货地址",
+    "module": "订单",
+    "sub_module": "地址管理",
+    "priority": "P2",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "订单",
+      "地址",
+      "切换"
+    ],
+    "steps": [
+      "进入结算页",
+      "点击地址区域",
+      "选择另一个地址",
+      "确认"
+    ],
+    "preconditions": "用户有多个地址",
+    "expected": "收货地址更新为新地址，运费如有差异应同步更新"
+  },
+  {
+    "title": "结算-新增收货地址",
+    "module": "订单",
+    "sub_module": "地址管理",
+    "priority": "P2",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "订单",
+      "地址",
+      "新增"
+    ],
+    "steps": [
+      "点击'新增地址'",
+      "填写姓名、电话、省市区、详细地址",
+      "设为默认地址",
+      "保存"
+    ],
+    "preconditions": "进入结算页",
+    "expected": "新地址保存成功并被选中为本次收货地址"
+  },
+  {
+    "title": "结算-发票信息填写",
+    "module": "订单",
+    "sub_module": "发票",
+    "priority": "P2",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "订单",
+      "发票",
+      "税务"
+    ],
+    "steps": [
+      "勾选'需要发票'",
+      "选择'公司'",
+      "输入税号、公司名",
+      "输入发票内容明细"
+    ],
+    "preconditions": "结算页面",
+    "expected": "发票信息保存，订单详情中显示发票状态为'待开票'"
+  },
+  {
+    "title": "支付-微信支付成功",
+    "module": "支付",
+    "sub_module": "微信支付",
+    "priority": "P0",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "支付",
+      "微信",
+      "正向"
+    ],
+    "steps": [
+      "选择微信支付",
+      "点击'立即支付'",
+      "扫码或在App确认支付",
+      "支付成功"
+    ],
+    "preconditions": "已提交订单，跳转至支付页",
+    "expected": "支付成功，跳转至'支付成功'页面，显示支付金额和订单号"
+  },
+  {
+    "title": "支付-微信支付取消",
+    "module": "支付",
+    "sub_module": "微信支付",
+    "priority": "P2",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "支付",
+      "微信",
+      "取消"
+    ],
+    "steps": [
+      "选择微信支付",
+      "点击'立即支付'",
+      "在微信支付界面点击取消"
+    ],
+    "preconditions": "订单待支付状态",
+    "expected": "支付取消，返回订单页，订单状态仍为'待支付'"
+  },
+  {
+    "title": "支付-支付宝支付成功",
+    "module": "支付",
+    "sub_module": "支付宝",
+    "priority": "P0",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "支付",
+      "支付宝",
+      "正向"
+    ],
+    "steps": [
+      "选择支付宝支付",
+      "点击'立即支付'",
+      "跳转至支付宝完成支付"
+    ],
+    "preconditions": "已提交订单",
+    "expected": "支付成功，订单状态变更为'已支付/待发货'"
+  },
+  {
+    "title": "支付-余额不足场景",
+    "module": "支付",
+    "sub_module": "支付失败",
+    "priority": "P1",
+    "category": "异常测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "支付",
+      "余额不足",
+      "异常"
+    ],
+    "steps": [
+      "选择余额支付",
+      "点击支付"
+    ],
+    "preconditions": "余额≤订单金额",
+    "expected": "提示'余额不足，请选择其他支付方式'，提供切换支付方式的入口"
+  },
+  {
+    "title": "支付-支付超时订单取消",
+    "module": "支付",
+    "sub_module": "支付超时",
+    "priority": "P1",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "支付",
+      "超时",
+      "订单取消"
+    ],
+    "steps": [
+      "等待30分钟",
+      "检查订单状态",
+      "尝试继续支付"
+    ],
+    "preconditions": "订单已创建30分钟未支付",
+    "expected": "订单状态变为'已取消'，无法支付，提示'订单已超时取消'"
+  },
+  {
+    "title": "支付-重复支付拒绝",
+    "module": "支付",
+    "sub_module": "幂等性",
+    "priority": "P1",
+    "category": "安全测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "支付",
+      "幂等",
+      "安全"
+    ],
+    "steps": [
+      "回到已支付订单页",
+      "再次点击'去支付'"
+    ],
+    "preconditions": "订单已支付成功",
+    "expected": "提示'该订单已支付，请勿重复支付'"
+  },
+  {
+    "title": "订单-查看订单详情",
+    "module": "订单",
+    "sub_module": "订单管理",
+    "priority": "P1",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "订单",
+      "详情",
+      "查询"
+    ],
+    "steps": [
+      "进入'我的订单'列表",
+      "点击某条订单"
+    ],
+    "preconditions": "用户有已完成订单",
+    "expected": "展示订单详情：商品信息、收货地址、物流单号、支付金额、订单状态时间线"
+  },
+  {
+    "title": "订单-取消未支付订单",
+    "module": "订单",
+    "sub_module": "订单管理",
+    "priority": "P1",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "订单",
+      "取消",
+      "退款"
+    ],
+    "steps": [
+      "进入订单详情",
+      "点击'取消订单'",
+      "选择取消原因'不想要了'",
+      "确认取消"
+    ],
+    "preconditions": "有1笔待支付订单",
+    "expected": "订单状态变为'已取消'，库存恢复，优惠券退回"
+  },
+  {
+    "title": "订单-申请退款",
+    "module": "订单",
+    "sub_module": "售后",
+    "priority": "P1",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "订单",
+      "退款",
+      "售后"
+    ],
+    "steps": [
+      "进入订单详情",
+      "点击'申请退款'",
+      "选择退款原因'拍错了'",
+      "提交申请"
+    ],
+    "preconditions": "已支付且未发货订单",
+    "expected": "退款申请提交成功，订单状态变更为'退款处理中'，退款金额原路返回"
+  },
+  {
+    "title": "订单-物流追踪",
+    "module": "订单",
+    "sub_module": "物流",
+    "priority": "P2",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "订单",
+      "物流",
+      "追踪"
+    ],
+    "steps": [
+      "进入订单详情",
+      "点击'查看物流'"
+    ],
+    "preconditions": "订单已发货有物流单号",
+    "expected": "展示物流轨迹时间线（已揽收→运输中→派送中→已签收），实时更新"
+  },
+  {
+    "title": "商品评价-发表评价",
+    "module": "评价",
+    "sub_module": "发布评价",
+    "priority": "P2",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "评价",
+      "用户反馈"
+    ],
+    "steps": [
+      "进入'待评价'列表",
+      "给商品打5星评分",
+      "上传图片评价",
+      "输入评价内容'质量很好！'",
+      "提交"
+    ],
+    "preconditions": "订单已完成，用户未评价",
+    "expected": "评价提交成功，显示'审核通过后展示'，该商品从待评价列表中移除"
+  },
+  {
+    "title": "商品评价-恶意内容过滤",
+    "module": "评价",
+    "sub_module": "内容审核",
+    "priority": "P1",
+    "category": "安全测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "评价",
+      "安全",
+      "内容审核"
+    ],
+    "steps": [
+      "输入含广告/敏感词的评价内容",
+      "提交评价"
+    ],
+    "preconditions": "订单已完成",
+    "expected": "提示'评价内容包含违规信息，请修改后提交'"
+  },
+  {
+    "title": "个人中心-修改昵称",
+    "module": "账号管理",
+    "sub_module": "个人信息",
+    "priority": "P2",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "账号",
+      "个人信息",
+      "修改"
+    ],
+    "steps": [
+      "进入'个人中心-个人信息'",
+      "修改昵称为'新昵称123'",
+      "保存"
+    ],
+    "preconditions": "用户已登录",
+    "expected": "昵称更新成功，各处显示新昵称"
+  },
+  {
+    "title": "个人中心-修改登录密码",
+    "module": "账号管理",
+    "sub_module": "安全",
+    "priority": "P1",
+    "category": "安全测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "账号",
+      "密码",
+      "安全"
+    ],
+    "steps": [
+      "进入'安全设置'",
+      "输入旧密码",
+      "输入新密码'NewP@ss789'",
+      "确认新密码",
+      "提交"
+    ],
+    "preconditions": "用户已登录",
+    "expected": "密码修改成功，提示'请重新登录'，旧密码失效"
+  },
+  {
+    "title": "个人中心-注销账号",
+    "module": "账号管理",
+    "sub_module": "注销",
+    "priority": "P2",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "账号",
+      "注销"
+    ],
+    "steps": [
+      "进入'安全中心-注销账号'",
+      "阅读注销须知",
+      "确认注销",
+      "输入验证码"
+    ],
+    "preconditions": "用户已登录",
+    "expected": "提交注销申请，提示'审核期7天，期间登录可撤回'"
+  },
+  {
+    "title": "商品收藏-添加/取消收藏",
+    "module": "收藏",
+    "sub_module": "商品收藏",
+    "priority": "P2",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "收藏",
+      "商品",
+      "交互"
+    ],
+    "steps": [
+      "点击商品页的'收藏'图标（心形）",
+      "再次点击"
+    ],
+    "preconditions": "用户已登录，商品详情页",
+    "expected": "首次点击心形变红/实心，收藏数量+1；再次点击取消收藏，心形变回空心"
+  },
+  {
+    "title": "首页-推荐商品加载",
+    "module": "首页",
+    "sub_module": "推荐",
+    "priority": "P1",
+    "category": "性能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "首页",
+      "推荐",
+      "性能"
+    ],
+    "steps": [
+      "打开App首页",
+      "向下滑动加载更多推荐商品",
+      "连续加载5页"
+    ],
+    "preconditions": "用户已登录",
+    "expected": "推荐商品列表加载流畅，每页最多20条，无闪白/闪烁，总加载时间<3s"
+  },
+  {
+    "title": "首页-Banner轮播",
+    "module": "首页",
+    "sub_module": "Banner",
+    "priority": "P2",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "首页",
+      "Banner",
+      "轮播"
+    ],
+    "steps": [
+      "观察Banner区域",
+      "等待自动轮播",
+      "手动左右滑动切换",
+      "点击Banner"
+    ],
+    "preconditions": "首页已加载",
+    "expected": "Banner 3秒自动切换，手动滑动流畅，点击跳转到对应活动页"
+  },
+  {
+    "title": "秒杀-库存为0时显示已售罄",
+    "module": "秒杀",
+    "sub_module": "库存",
+    "priority": "P1",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "秒杀",
+      "库存",
+      "限时"
+    ],
+    "steps": [
+      "进入秒杀活动页",
+      "观察售罄商品"
+    ],
+    "preconditions": "秒杀商品库存已为0",
+    "expected": "该商品显示'已售罄'标签，购买按钮置灰不可点击"
+  },
+  {
+    "title": "秒杀-同时下单库存扣减",
+    "module": "秒杀",
+    "sub_module": "并发",
+    "priority": "P0",
+    "category": "性能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "秒杀",
+      "并发",
+      "超卖"
+    ],
+    "steps": [
+      "模拟500个用户同时抢购",
+      "检查最终成功订单数",
+      "检查数据库库存扣减"
+    ],
+    "preconditions": "秒杀商品库存100件",
+    "expected": "成功订单数≤100，不超卖，库存准确归0"
+  },
+  {
+    "title": "通知-下单成功推送通知",
+    "module": "通知",
+    "sub_module": "推送",
+    "priority": "P1",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "通知",
+      "推送",
+      "订单"
+    ],
+    "steps": [
+      "完成一笔订单支付",
+      "退到后台等待"
+    ],
+    "preconditions": "用户已登录且开启推送权限",
+    "expected": "收到推送通知'订单支付成功！您的订单已确认'"
+  },
+  {
+    "title": "优惠券-领取与过期",
+    "module": "营销",
+    "sub_module": "优惠券",
+    "priority": "P2",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "营销",
+      "优惠券",
+      "领取"
+    ],
+    "steps": [
+      "进入领券中心领取优惠券",
+      "查看'我的优惠券'列表",
+      "查看已过期优惠券列表"
+    ],
+    "preconditions": "有可用优惠券活动",
+    "expected": "领取成功显示在'我的优惠券'中，过期券自动移至'已过期'且不能使用"
+  },
+  {
+    "title": "API-库存接口高并发压测",
+    "module": "API测试",
+    "sub_module": "性能",
+    "priority": "P1",
+    "category": "性能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "API",
+      "性能",
+      "并发"
+    ],
+    "steps": [
+      "使用wrk/ab发送1000并发请求到/api/inventory/query",
+      "持续30秒",
+      "观察响应时间和错误率"
+    ],
+    "preconditions": "库存查询API正常运行",
+    "expected": "QPS≥500，P99延迟<500ms，错误率<0.1%"
+  },
+  {
+    "title": "API-下单接口幂等性",
+    "module": "API测试",
+    "sub_module": "幂等",
+    "priority": "P1",
+    "category": "安全测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "API",
+      "幂等",
+      "下单"
+    ],
+    "steps": [
+      "使用相同幂等键(idempotent-key:ABC123)发送两次下单请求"
+    ],
+    "preconditions": "下单API可用",
+    "expected": "第一次返回201 Created，第二次返回200 OK+相同订单号，不生成重复订单"
+  },
+  {
+    "title": "API-Token过期处理",
+    "module": "API测试",
+    "sub_module": "鉴权",
+    "priority": "P1",
+    "category": "安全测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "API",
+      "鉴权",
+      "Token"
+    ],
+    "steps": [
+      "使用过期Token调用/api/user/profile",
+      "检查返回结果"
+    ],
+    "preconditions": "用户的access_token已过期",
+    "expected": "返回401 Unauthorized + 'token_expired'，客户端应使用refresh_token自动续期"
+  },
+  {
+    "title": "API-参数校验-商品ID不存在",
+    "module": "API测试",
+    "sub_module": "参数校验",
+    "priority": "P2",
+    "category": "功能测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "API",
+      "参数校验",
+      "异常"
+    ],
+    "steps": [
+      "请求GET /api/product/detail?id=9999999（不存在的ID）"
+    ],
+    "preconditions": "API服务正常",
+    "expected": "返回404 Not Found + '商品不存在'，不返回空数据或无响应的白页"
+  },
+  {
+    "title": "API-Rate Limiting频率限制",
+    "module": "API测试",
+    "sub_module": "限流",
+    "priority": "P1",
+    "category": "安全测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "API",
+      "限流",
+      "安全"
+    ],
+    "steps": [
+      "同一IP在1秒内发送120次请求"
+    ],
+    "preconditions": "限流规则：每IP每分钟100次",
+    "expected": "第101次开始返回429 Too Many Requests，响应头包含Retry-After"
+  },
+  {
+    "title": "跨平台-移动端登录态同步",
+    "module": "兼容性",
+    "sub_module": "多端同步",
+    "priority": "P2",
+    "category": "兼容性测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "兼容性",
+      "多端",
+      "同步"
+    ],
+    "steps": [
+      "同一账号PC浏览器登录",
+      "在App中修改昵称",
+      "刷新PC页面"
+    ],
+    "preconditions": "账号在手机App登录",
+    "expected": "PC端显示更新后的昵称，两边登录态互不踢出"
+  },
+  {
+    "title": "跨平台-微信小程序兼容",
+    "module": "兼容性",
+    "sub_module": "小程序",
+    "priority": "P1",
+    "category": "兼容性测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "兼容性",
+      "小程序",
+      "微信"
+    ],
+    "steps": [
+      "在微信小程序中打开商城",
+      "完成浏览-加购-下单-支付全流程"
+    ],
+    "preconditions": "微信小程序环境",
+    "expected": "所有功能正常运行，页面适配小程序屏幕，调用小程序原生支付"
+  },
+  {
+    "title": "跨平台-断网重连与离线数据",
+    "module": "兼容性",
+    "sub_module": "网络切换",
+    "priority": "P2",
+    "category": "异常测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "兼容性",
+      "断网",
+      "离线"
+    ],
+    "steps": [
+      "浏览商品时切换到飞行模式",
+      "尝试操作（收藏、加购）",
+      "恢复网络"
+    ],
+    "preconditions": "App已打开",
+    "expected": "断网时显示'网络开小差了'，操作不丢数据，恢复网络后自动同步"
+  },
+  {
+    "title": "安全-CSRF跨站请求伪造防护",
+    "module": "安全测试",
+    "sub_module": "CSRF",
+    "priority": "P1",
+    "category": "安全测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "安全",
+      "CSRF",
+      "防护"
+    ],
+    "steps": [
+      "构造恶意页面，自动向商城API发起POST修改密码请求"
+    ],
+    "preconditions": "用户已登录",
+    "expected": "请求因缺少CSRF Token被拒绝，返回403 Forbidden"
+  },
+  {
+    "title": "安全-敏感信息泄露检测",
+    "module": "安全测试",
+    "sub_module": "信息泄露",
+    "priority": "P0",
+    "category": "安全测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "安全",
+      "隐私",
+      "脱敏"
+    ],
+    "steps": [
+      "查看个人信息API返回",
+      "检查订单API返回中的手机号格式"
+    ],
+    "preconditions": "用户已登录",
+    "expected": "手机号展示为138****0000，身份证展示为110***********1234，不返回完整敏感信息"
+  },
+  {
+    "title": "安全-暴力破解登录防护",
+    "module": "安全测试",
+    "sub_module": "暴力破解",
+    "priority": "P0",
+    "category": "安全测试",
+    "project": "电商平台",
+    "creator": "admin",
+    "created_at": "2026-05-19 10:34:24",
+    "tags": [
+      "安全",
+      "暴力破解",
+      "登录"
+    ],
+    "steps": [
+      "同一IP使用不同密码尝试登录同一账号10次",
+      "第6次输入正确密码"
+    ],
+    "preconditions": "攻击者/用户尝试暴力破解",
+    "expected": "连续5次失败后显示验证码，10次后锁定IP 1小时"
+  }
+]

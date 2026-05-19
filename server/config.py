@@ -9,6 +9,13 @@
   TC_EMBED_MODEL    嵌入模型 (默认 all-MiniLM-L6-v2)
   TC_CHROMA_DIR     ChromaDB 目录 (默认 .chroma_db)
   TC_DATA_DIR       项目数据根目录 (默认 auto)
+
+  # LightRAG 环境变量覆盖
+  TC_LIGHTRAG_ENABLED        是否启用 LightRAG
+  TC_LLM_PROVIDER            deepseek | ollama
+  TC_DEEPSEEK_API_KEY        DeepSeek API Key
+  TC_OLLAMA_BASE_URL         Ollama 地址
+  TC_LLM_MODEL               LLM 模型名
 """
 
 import os
@@ -40,6 +47,8 @@ class Config:
         file_config = _load_config_file()
         api_cfg = file_config.get("api", {}) if file_config else {}
         engine_cfg = file_config.get("engine", {}) if file_config else {}
+        lightrag_cfg = file_config.get("lightrag", {}) if file_config else {}
+        llm_cfg = lightrag_cfg.get("llm", {}) if lightrag_cfg else {}
 
         api_host = api_cfg.get("host", "0.0.0.0")
         api_port = api_cfg.get("port", 8765)
@@ -61,6 +70,24 @@ class Config:
             else:
                 data_dir = _find_project_root()
             self.chroma_dir = data_dir / chroma_dir
+
+        # ── LightRAG 配置 ──
+        _lr_enabled = os.getenv("TC_LIGHTRAG_ENABLED")
+        if _lr_enabled is not None:
+            self.lightrag_enabled = _lr_enabled.lower() in ("1", "true", "yes")
+        else:
+            self.lightrag_enabled = lightrag_cfg.get("enabled", False)
+
+        self.lightrag_working_dir = lightrag_cfg.get("working_dir", ".lightrag_storage")
+        self.lightrag_embed_model = lightrag_cfg.get("embed_model", self.embed_model)
+        self.lightrag_top_k = lightrag_cfg.get("top_k", 20)
+        self.lightrag_mode = lightrag_cfg.get("mode", "mix")
+
+        # LLM 配置
+        self.llm_provider = os.getenv("TC_LLM_PROVIDER", llm_cfg.get("provider", "deepseek"))
+        self.deepseek_api_key = os.getenv("TC_DEEPSEEK_API_KEY", os.getenv("DEEPSEEK_API_KEY", llm_cfg.get("api_key", "")))
+        self.ollama_base_url = os.getenv("TC_OLLAMA_BASE_URL", llm_cfg.get("base_url", "http://localhost:11434"))
+        self.llm_model = os.getenv("TC_LLM_MODEL", llm_cfg.get("model", "deepseek-chat"))
 
 
 def get_config() -> Config:

@@ -37,6 +37,15 @@ spec.loader.exec_module(engine_mod)
 TestCase = engine_mod.TestCase
 get_engine = engine_mod.get_engine
 
+from config import get_config
+from lightrag_engine import LightRAGEngine
+from search import SearchRouter
+
+mcp_cfg = get_config()
+mcp_lightrag = LightRAGEngine(mcp_cfg)
+mcp_engine = get_engine()
+mcp_search_router = SearchRouter(mcp_engine, mcp_lightrag)
+
 # ── 输入清洗 ──
 
 
@@ -86,7 +95,10 @@ engine = get_engine()
 TOOLS = [
     {
         "name": "tc_search",
-        "description": "语义搜索测试用例，返回最匹配的结果。支持按 module（父模块）和 sub_module（子模块/测试点）精确筛选",
+        "description": "语义搜索测试用例，返回最匹配的结果。支持按 module（父模块）和 sub_module（子模块/测试点）精确筛选。"
+            "【检索策略】如果首轮结果不够理想（得分低或数量不足），请尝试用不同的关键词或更简洁/更具体的表述再次搜索。"
+            "支持多轮检索：先用宽泛关键词查，再逐步精化。"
+            "也可以先调 tc_project_types 了解项目类型和模块分布后再搜索。",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -228,6 +240,47 @@ TOOLS = [
             },
             "required": [],
         },
+    },
+    {
+        "name": "tc_graph_search",
+        "description": "【需 LightRAG 启用】知识图谱检索，通过实体-关系图找到与查询相关的概念和用例。"
+            "适合跨模块关联查询、多跳推理。"
+            "返回实体列表、关系列表和关联文本片段。"
+            "如果返回为空，尝试简化查询词或调 tc_graph_status 查看图谱是否已有数据。"
+            "【先调 tc_project_types 了解项目分布，再结合 tc_search 走向量检索作为补充】",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "搜索关键词或自然语言描述"},
+                "n_results": {"type": "number", "description": "返回结果数量（默认5，最多20）", "default": 5},
+            },
+            "required": ["query"],
+        },
+    },
+    {
+        "name": "tc_agentic_search",
+        "description": "【推荐】自适应智能检索——自动决定检索策略。"
+            "先走向量搜索（语义匹配），再用知识图谱（实体关系）增强结果。"
+            "如果图谱不可用，自动降级为纯向量搜索。"
+            "适合复杂问题、不确定怎么搜的场景。"
+            "返回: 向量命中的用例列表 +（如有图谱）关联实体和关系。",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "搜索关键词或自然语言描述"},
+                "n_results": {"type": "number", "description": "返回结果数量（默认5，最多20）", "default": 5},
+                "module": {"type": "string", "description": "按父模块筛选"},
+                "priority": {"type": "string", "description": "按优先级筛选（P0/P1/P2/P3）"},
+                "category": {"type": "string", "description": "按类别筛选"},
+            },
+            "required": ["query"],
+        },
+    },
+    {
+        "name": "tc_graph_status",
+        "description": "查看知识图谱（LightRAG）的运行状态：是否启用、是否已建图、实体数量、LLM 提供商等。"
+            "如果 tc_graph_search 没有返回结果，先调此工具诊断。",
+        "inputSchema": {"type": "object", "properties": {}},
     },
 ]
 
@@ -472,6 +525,58 @@ def handle_tool(name: str, args: dict) -> dict:
         else:
             return {"content": [{"type": "text", "text": "❌ 请提供 id（删单条），或 module/project（批量删除）"}]}
 
+    elif name == "tc_graph_search":
+        if not mcp_lightrag.is_available():
+            return {"content": [{"type": "text", "text": "❌ LightRAG 图谱未启用或初始化失败。可调 tc_graph_status 查看详情"}]}
+        query = args.get("query", "").strip()
+        if not query:
+            return {"content": [{"type": "text", "text": "请提供搜索关键词"}]}
+        result = mcp_lightrag.search(query, n_results=min(int(args.get("n_results", 5)), 20))
+        if not result.get("ok"):
+            return {"content": [{"type": "text", "text": f"❌ 图谱检索失败: {result.get('message', '')}"}]}
+        entities = result.get("entities", [])
+        relationships = result.get("relationships", [])
+        text = f"## 🕸️ 知识图谱检索「{query}」\n\n共找到 {len(entities)} 个实体, {len(relationships)} 条关系\n\n"
+        if entities:
+            text += "### 📍 实体\n\n"
+            for e in entities:
+                text += f"- **{e['name']}**（{e.get('type', '-')}）\n  {e.get('description', '')[:150]}\n"
+        if relationships:
+            text += "\n### 🔗 关系\n\n"
+            for r in relationships[:10]:
+                text += f"- {r['source']} → {r['target']}: {r.get('description', '')[:100]}\n"
+        return {"content": [{"type": "text", "text": text.strip()}]}
+
+    elif name == "tc_agentic_search":
+        query = args.get("query", "").strip()
+        if not query:
+            return {"content": [{"type": "text", "text": "请提供搜索关键词"}]}
+        result = mcp_search_router.search(
+            query=query,
+            n_results=min(int(args.get("n_results", 5)), 20),
+            module=args.get("module"),
+            priority=args.get("priority"),
+            category=args.get("category"),
+            mode="auto",
+        )
+        text = f"## 🔍 自适应检索「{query}」\n\n模式: {result['mode']}\n\n"
+        for r in result.get("results", []):
+            text += f"**{r['title']}** [{r['score']:.2f}]\n`{r['id']}` | {r['module']} | {r['priority']}\n\n"
+        if result.get("graph_hits"):
+            entities = result["graph_hits"].get("entities", [])
+            if entities:
+                text += f"### 🕸️ 图谱增强（{len(entities)} 实体）\n"
+                for e in entities[:5]:
+                    text += f"- {e['name']}\n"
+        return {"content": [{"type": "text", "text": text.strip()}]}
+
+    elif name == "tc_graph_status":
+        status = mcp_lightrag.get_status()
+        text = f"## LightRAG 状态\n启用: {status.get('enabled')}\n就绪: {status.get('ready')}\n提供商: {status.get('provider', '-')}\n模型: {status.get('model', '-')}\n"
+        if status.get("node_count") is not None:
+            text += f"实体数: {status['node_count']}\n"
+        return {"content": [{"type": "text", "text": text.strip()}]}
+
     else:
         return {"content": [{"type": "text", "text": f"未知工具: {name}"}]}
 
@@ -497,7 +602,7 @@ def main():
                 "result": {
                     "protocolVersion": "2024-11-05",
                     "capabilities": {"tools": {}},
-                    "serverInfo": {"name": "testcase-rag-mcp", "version": "2.0.0"},
+                    "serverInfo": {"name": "testcase-rag-mcp", "version": "3.0.0"},
                 },
             })
         elif method == "notifications/initialized":

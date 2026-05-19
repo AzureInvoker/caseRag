@@ -524,6 +524,27 @@ class VectorEngine:
             })
         return result
 
+    def get_all_texts(self) -> list[dict]:
+        """导出全量用例的原始文本和元数据（供 LightRAG 迁移用）"""
+        all_docs = self.collection.get()
+        if not all_docs["ids"]:
+            return []
+        results = []
+        for i, id_ in enumerate(all_docs["ids"]):
+            meta = all_docs["metadatas"][i]
+            doc = all_docs["documents"][i] if all_docs["documents"] else ""
+            results.append({
+                "id": id_,
+                "title": meta.get("title", ""),
+                "module": meta.get("module", ""),
+                "project": meta.get("project", ""),
+                "priority": meta.get("priority", ""),
+                "category": meta.get("category", ""),
+                "tags": meta.get("tags", ""),
+                "text": doc,
+            })
+        return results
+
     def get_all(self, module: str = None, priority: str = None,
                 category: str = None, sub_module: str = None,
                 offset: int = 0, limit: int = 50) -> list[dict]:

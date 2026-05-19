@@ -27,7 +27,18 @@ case "${1:-help}" in
     fi
     ;;
 
+  modelswitch)
+    if [ -z "$2" ]; then
+      echo "❌ 请指定目标模型名"
+      echo "   用法: ./run.sh modelswitch <model_name>"
+      echo "   示例: ./run.sh modelswitch paraphrase-multilingual-MiniLM-L12-v2"
+      exit 1
+    fi
+    echo "🔄 切换嵌入模型为: $2"
+    uv run python3 scripts/model_switch.py "$2"
+    ;;
+
   *)
-    echo "用法: ./run.sh start|stop|update"
+    echo "用法: ./run.sh start|stop|update|modelswitch <model_name>"
     ;;
 esac

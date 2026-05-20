@@ -1,18 +1,33 @@
 # ──────────────────────────────────────────
-# 测试用例知识库 — 配置文件
-# 复制为 config.yaml 并修改
+# 测试用例知识库 — 配置文件参考模板
+# 复制为 config.yaml 并按需修改
 # ──────────────────────────────────────────
 
-# API 服务
 api:
   host: "0.0.0.0"
   port: 8765
 
-# 向量引擎
 engine:
-  # 嵌入模型，可选：
-  #   BAAI/bge-small-zh-v1.5    (33MB, ⭐推荐，原生中文)
-  #   all-MiniLM-L6-v2          (22MB, 纯英文，中文不适用)
-  embed_model: "BAAI/bge-small-zh-v1.5"
-  # ChromaDB 持久化目录（相对于项目根目录）
+  embed_model: "intfloat/multilingual-e5-small"  # 或 paraphrase-multilingual-MiniLM-L12-v2
   chroma_dir: ".chroma_db"
+
+# LightRAG 知识图谱增强（可选）
+lightrag:
+  enabled: false                     # true=开启图谱增强，false=只用 ChromaDB
+  working_dir: ".lightrag_storage"   # 图谱存储目录
+
+  # LLM 配置（建图用）
+  llm:
+    provider: deepseek               # deepseek | ollama
+    api_key: "${DEEPSEEK_API_KEY}"   # 环境变量引用（推荐）
+    model: deepseek-chat
+    # ollama 模式用：
+    # base_url: http://localhost:11434
+    # model: qwen2.5:7b
+
+  # 嵌入配置（CPU 即可，首次启动会下载模型）
+  embed_model: "intfloat/multilingual-e5-small"
+
+  # 检索参数
+  top_k: 20
+  mode: mix                          # local | global | mix

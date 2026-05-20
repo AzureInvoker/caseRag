@@ -37,6 +37,7 @@ lightrag:
     # 后端类型: deepseek | ollama
     provider: deepseek
     # DeepSeek API Key（推荐用环境变量引用）
+    # DeepSeek 使用标准 API 地址 https://api.deepseek.com/v1，无需配 base_url
     api_key: "${DEEPSEEK_API_KEY}"
     # 模型名
     model: deepseek-chat

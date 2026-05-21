@@ -347,7 +347,7 @@ def _mcp_handle(name: str, args: dict) -> dict:
         if not query:
             return {"content": [{"type": "text", "text": "请提供搜索关键词"}]}
         n_results = min(int(args.get("n_results", 5)), 20)
-        result = await search_router.async_search(
+        result = search_router.search(
             query=query,
             n_results=n_results,
             module=args.get("module"),

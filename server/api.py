@@ -987,6 +987,48 @@ def project_types():
     return {"project_types": engine.get_project_types_detail()}
 
 
+class GraphSearchRequest(BaseModel):
+    query: str = Field(..., description="搜索关键词")
+    n_results: int = Field(5, description="返回数量", ge=1, le=50)
+    mode: str = Field("auto", description="检索模式: auto(向量+图谱)/graph(仅图谱)/chroma(仅向量)")
+
+
+@app.post("/api/v1/search/graph")
+async def search_graph(req: GraphSearchRequest):
+    """LightRAG 知识图谱检索"""
+    if not lightrag_engine.is_available():
+        raise HTTPException(status_code=503, detail="LightRAG 图谱未启用或初始化失败")
+    result = await lightrag_engine.async_search(req.query, n_results=req.n_results)
+    if not result.get("ok"):
+        raise HTTPException(status_code=500, detail=result.get("message", "图谱检索失败"))
+    return {
+        "query": req.query,
+        "entities": result.get("entities", []),
+        "relationships": result.get("relationships", []),
+        "chunks": result.get("chunks", []),
+    }
+
+
+@app.post("/api/v1/search/agentic")
+async def search_agentic(req: GraphSearchRequest):
+    """自适应检索 — 向量搜索 + 图谱增强"""
+    result = await search_router.async_search(
+        query=req.query, n_results=req.n_results, mode=req.mode,
+    )
+    return {
+        "query": req.query,
+        "mode": result["mode"],
+        "results": result.get("results", []),
+        "graph_hits": result.get("graph_hits"),
+    }
+
+
+@app.get("/api/v1/graph/status")
+async def graph_status():
+    """LightRAG 知识图谱状态"""
+    return lightrag_engine.get_status()
+
+
 # ── 文件上传（临时，用于接收 ChromaDB 导出） ──
 
 import os as _os

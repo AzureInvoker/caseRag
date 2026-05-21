@@ -18,6 +18,7 @@ MCP 写入工具使用说明:
 
 import json
 import asyncio
+import logging
 import re
 from datetime import datetime
 
@@ -30,6 +31,15 @@ from .engine import TestCase, get_engine
 from .config import get_config
 from .lightrag_engine import LightRAGEngine
 from .search import SearchRouter
+
+logger = logging.getLogger("api")
+
+# ── 初始化（模块加载时同步初始化，启动时一次完成） ──
+
+engine = get_engine()
+cfg = get_config()
+lightrag_engine = LightRAGEngine(cfg)
+search_router = SearchRouter(engine, lightrag_engine)
 
 # ── FastAPI 应用 ──
 
@@ -47,15 +57,89 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-engine = get_engine()
-cfg = get_config()
-lightrag_engine = LightRAGEngine(cfg)
-search_router = SearchRouter(engine, lightrag_engine)
+# ── 异步工具处理器（图谱搜索等需要 await 的操作） ──
+
+
+async def _async_graph_search(args: dict) -> dict:
+    """异步知识图谱搜索"""
+    if not lightrag_engine.is_available():
+        return {"content": [{"type": "text", "text": "❌ LightRAG 图谱未启用或初始化失败。可调 tc_graph_status 查看详情"}]}
+    query = args.get("query", "").strip()
+    if not query:
+        return {"content": [{"type": "text", "text": "请提供搜索关键词"}]}
+    result = await lightrag_engine.async_search(query, n_results=min(int(args.get("n_results", 5)), 20))
+    if not result.get("ok"):
+        return {"content": [{"type": "text", "text": f"❌ 图谱检索失败: {result.get('message', '')}"}]}
+    entities, relationships, chunks = result.get("entities", []), result.get("relationships", []), result.get("chunks", [])
+    text = f"## 🕸️ 知识图谱检索「{query}」\n\n共找到 {len(entities)} 个实体, {len(relationships)} 条关系, {len(chunks)} 个片段\n\n"
+    if entities:
+        text += "### 📍 实体\n\n"
+        for e in entities:
+            text += f"- **{e['name']}**（{e.get('type', '-')}）\n  {e.get('description', '')[:150]}\n"
+    if relationships:
+        text += "\n### 🔗 关系\n\n"
+        for r in relationships[:10]:
+            text += f"- {r['source']} → {r['target']}: {r.get('description', '')[:100]}\n"
+    if chunks:
+        text += "\n### 📄 相关片段\n\n"
+        for c in chunks[:5]:
+            text += f"- {c.get('content', '')[:200]}...\n"
+    return {"content": [{"type": "text", "text": text.strip()}]}
+
+
+async def _async_agentic_search(args: dict) -> dict:
+    """异步自适应检索"""
+    query = args.get("query", "").strip()
+    if not query:
+        return {"content": [{"type": "text", "text": "请提供搜索关键词"}]}
+    n_results = min(int(args.get("n_results", 5)), 20)
+    result = search_router.search(query=query, n_results=n_results, module=args.get("module"), priority=args.get("priority"), category=args.get("category"), mode="auto")
+    text = f"## 🔍 自适应检索「{query}」\n\n模式: {result['mode']}\n\n"
+    cr = result.get("results", [])
+    if cr:
+        text += f"### 📋 向量匹配结果（{len(cr)} 条）\n\n"
+        for r in cr:
+            text += f"**{r['title']}** [{'█' * int(r['score'] * 20)}{'░' * (20 - int(r['score'] * 20))}] {r['score']:.2f}\n`{r['id']}` | {r['module']} | {r['priority']}\n\n"
+    else:
+        text += "无可用的向量搜索结果\n\n"
+    gh = result.get("graph_hits")
+    if gh:
+        ents = gh.get("entities", [])
+        rels = gh.get("relationships", [])
+        if ents:
+            text += f"### 🕸️ 图谱增强（{len(ents)} 实体）\n\n"
+            for e in ents[:5]:
+                text += f"- **{e['name']}**\n"
+        if rels:
+            text += "\n"
+            for r in rels[:5]:
+                text += f"- {r['source']} → {r['target']}\n"
+    return {"content": [{"type": "text", "text": text.strip()}]}
+
+
+async def _async_graph_status() -> dict:
+    """异步图谱状态"""
+    if not cfg.lightrag_enabled:
+        return {"content": [{"type": "text", "text": "📋 LightRAG 状态: 未启用"}]}
+    status = lightrag_engine.get_status()
+    text = "## 📊 LightRAG 状态\n\n| 字段 | 值 |\n|------|-----|\n"
+    text += f"| 启用 | {'✅ 是' if status.get('enabled') else '❌ 否'} |\n"
+    text += f"| 就绪 | {'✅ 是' if status.get('ready') else '❌ 否'} |\n"
+    text += f"| LLM 提供商 | {status.get('provider', '-')} |\n"
+    text += f"| LLM 模型 | {status.get('model', '-')} |\n"
+    if status.get("node_count") is not None:
+        text += f"| 实体数量 | {status['node_count']} |\n"
+    if status.get("processing_status"):
+        text += f"| 处理状态 | {status['processing_status']} |\n"
+    if status.get("message"):
+        text += f"| 消息 | {status['message']} |\n"
+    return {"content": [{"type": "text", "text": text.strip()}]}
+
 
 # ── 输入清洗 ──
 
+
 def _clean_text(s: str) -> str:
-    """清洗单行文本：去换行、去首尾空白、合并连续空白"""
     if not isinstance(s, str):
         return ""
     s = s.replace("\\n", " ").replace("\\r", " ")
@@ -724,8 +808,13 @@ async def mcp_message(msg: MCPMessage, request: Request, session_id: str = Query
         tool_name = msg.params.get("name", "")
         tool_args = _normalize_args(msg.params.get("arguments", {}))
 
-        # tc_add / tc_add_batch 走专用处理函数
-        if tool_name == "tc_add":
+        if tool_name == "tc_graph_search":
+            result = await _async_graph_search(tool_args)
+        elif tool_name == "tc_agentic_search":
+            result = await _async_agentic_search(tool_args)
+        elif tool_name == "tc_graph_status":
+            result = await _async_graph_status()
+        elif tool_name == "tc_add":
             result = _mcp_handle_tc_add(tool_args)
         elif tool_name == "tc_add_batch":
             result = _mcp_handle_tc_add_batch(tool_args)

@@ -1,25 +1,29 @@
 
 .chroma_db/*
+.lightrag_storage/
 config.yaml
-.DS_Store
-*.egg-info/
-# IDE
+chroma_db.zip
+
+# IDE & editor
 .idea/
-img/\nimg_backup/
-*.log
+.vscode/
+
+# Python
 __pycache__/
 *.py[cod]
-# Python
+*.egg-info/
 *.swp
-Thumbs.db
-/tmp/
 .venv/
 venv/
-.vscode/
-# 向量数据库
-# 日志
-# 系统
-# 配置文件（每台机器自定义）
-chroma_db.zip
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp & logs
+/tmp/
+*.log
+
+# Data
 img/
 img_backup/

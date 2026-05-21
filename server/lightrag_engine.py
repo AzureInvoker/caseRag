@@ -184,18 +184,6 @@ class LightRAGEngine:
                 max_parallel_insert=2,
             )
 
-            # 初始化存储（必须调，否则 insert 报错）
-            import asyncio
-            try:
-                loop = asyncio.get_running_loop()
-            except RuntimeError:
-                loop = None
-            if loop and loop.is_running():
-                # 已有事件循环 → 创建新 loop 来跑
-                asyncio.run_coroutine_threadsafe(self._rag.initialize_storages(), loop).result()
-            else:
-                asyncio.run(self._rag.initialize_storages())
-
             self._QueryParam = QueryParam
             self._ready = True
             logger.info(f"LightRAG 初始化成功 (provider={self.cfg.llm_provider}, model={self.cfg.llm_model})")
@@ -204,6 +192,20 @@ class LightRAGEngine:
             self._ready = False
             self._error = str(e)
             logger.error(f"LightRAG 初始化失败: {e}")
+
+    async def _init_storages_async(self):
+        """异步初始化 LightRAG 存储（在 FastAPI 启动时调用）"""
+        if not self._ready or self._rag is None:
+            return False
+        try:
+            await self._rag.initialize_storages()
+            logger.info("LightRAG 存储初始化完成")
+            return True
+        except Exception as e:
+            self._ready = False
+            self._error = str(e)
+            logger.error(f"LightRAG 存储初始化失败: {e}")
+            return False
 
     def _resolve_api_key(self) -> str:
         key = self.cfg.deepseek_api_key
@@ -230,16 +232,32 @@ class LightRAGEngine:
         if not self.is_available():
             return {"ok": False, "message": self._error or "LightRAG 不可用"}
         try:
-            track_id = self._rag.insert(texts, ids=ids)
+            import asyncio
+
+            async def _do_insert():
+                return await self._rag.insert(texts, ids=ids)
+
+            track_id = asyncio.run(_do_insert())
             return {"ok": True, "message": f"成功插入 {len(texts)} 条", "track_id": track_id}
         except Exception as e:
             logger.error(f"LightRAG insert 失败: {e}")
             return {"ok": False, "message": str(e)}
 
     def search(self, query: str, n_results: int = 5) -> dict:
+        """同步搜索（从非异步上下文调用：迁移脚本、CLI 等）"""
         if not self.is_available():
             return {"ok": False, "message": self._error or "LightRAG 不可用", "entities": [], "relationships": [], "chunks": []}
+        try:
+            import asyncio
+            return asyncio.run(self.async_search(query, n_results))
+        except Exception as e:
+            logger.error(f"LightRAG search 失败: {e}")
+            return {"ok": False, "message": str(e), "entities": [], "relationships": [], "chunks": []}
 
+    async def async_search(self, query: str, n_results: int = 5) -> dict:
+        """异步搜索（从 async MCP handler 中直接 await）"""
+        if not self.is_available():
+            return {"ok": False, "message": self._error or "LightRAG 不可用", "entities": [], "relationships": [], "chunks": []}
         try:
             param = self._QueryParam(
                 mode=self.cfg.lightrag_mode,
@@ -247,7 +265,7 @@ class LightRAGEngine:
                 chunk_top_k=n_results,
                 only_need_context=True,
             )
-            result = self._rag.query_data(query, param=param)
+            result = await self._rag.query_data(query, param=param)
 
             if result.get("status") != "success":
                 return {"ok": False, "message": result.get("message", "未知错误"), "entities": [], "relationships": [], "chunks": []}
@@ -284,7 +302,7 @@ class LightRAGEngine:
             }
 
         except Exception as e:
-            logger.error(f"LightRAG search 失败: {e}")
+            logger.error(f"LightRAG async_search 失败: {e}")
             return {"ok": False, "message": str(e), "entities": [], "relationships": [], "chunks": []}
 
     def get_status(self) -> dict:
@@ -295,17 +313,29 @@ class LightRAGEngine:
             return {"enabled": True, "ready": False, "message": self._error or "初始化失败"}
         try:
             import asyncio
-            # run async methods in sync context
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
+
+            async def _fetch_status():
+                try:
+                    status = await self._rag.get_processing_status()
+                    graph = await self._rag.get_knowledge_graph("")
+                    return status, graph
+                except Exception as e:
+                    return None, {"error": str(e)}
+
+            # 如果有运行中的事件循环，用它跑；否则创建新循环
             try:
-                status = loop.run_until_complete(self._rag.get_processing_status())
-                graph = loop.run_until_complete(self._rag.get_knowledge_graph(""))
-            finally:
-                loop.close()
+                loop = asyncio.get_running_loop()
+                if loop.is_running():
+                    future = asyncio.run_coroutine_threadsafe(_fetch_status(), loop)
+                    status_info, graph = future.result(timeout=15)
+                else:
+                    status_info, graph = asyncio.run(_fetch_status())
+            except RuntimeError:
+                # 没有运行中的事件循环
+                status_info, graph = asyncio.run(_fetch_status())
 
             node_count = 0
-            if graph:
+            if graph and isinstance(graph, dict):
                 try:
                     node_count = len(graph.get("nodes", []))
                 except Exception:
@@ -316,7 +346,8 @@ class LightRAGEngine:
                 "provider": self.cfg.llm_provider,
                 "model": self.cfg.llm_model,
                 "node_count": node_count,
-                "processing_status": status,
+                "processing_status": status_info,
             }
         except Exception as e:
+            # 降级：至少返回启用/就绪信息
             return {"enabled": True, "ready": True, "message": str(e)}

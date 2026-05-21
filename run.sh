@@ -5,11 +5,23 @@ case "${1:-help}" in
   start)
     echo "🚀 启动 API..."
     nohup uv run uvicorn server.api:app --host 0.0.0.0 --port 8765 > /tmp/testcase-rag.log 2>&1 &
-    echo "PID: $!"
+    PID=$!
+    echo "$PID" > /tmp/testcase-rag.pid
+    echo "PID: $PID"
     ;;
   stop)
     echo "🛑 停止 API..."
-    pkill -f "uvicorn.*server.api" 2>/dev/null && echo "已停止" || echo "未运行"
+    if [ -f /tmp/testcase-rag.pid ]; then
+      PID=$(cat /tmp/testcase-rag.pid)
+      if kill -0 "$PID" 2>/dev/null; then
+        kill "$PID" && echo "已停止 PID: $PID" || echo "停止失败"
+      else
+        echo "PID $PID 不存在，可能已手动停止"
+      fi
+      rm -f /tmp/testcase-rag.pid
+    else
+      echo "未找到 PID 文件（/tmp/testcase-rag.pid）"
+    fi
     ;;
   update)
     echo "🔄 拉取最新代码..."

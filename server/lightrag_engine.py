@@ -277,7 +277,7 @@ class LightRAGEngine:
                 chunk_top_k=n_results,
                 only_need_context=True,
             )
-            result = await self._rag.query_data(query, param=param)
+            result = await self._rag.aquery_data(query, param=param)
 
             if result.get("status") != "success":
                 return {"ok": False, "message": result.get("message", "未知错误"), "entities": [], "relationships": [], "chunks": []}

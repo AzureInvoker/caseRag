@@ -145,6 +145,7 @@ class LightRAGEngine:
         self._rag = None
         self._ready = False
         self._error = None
+        self._storages_initialized = False
 
     def _lazy_init(self):
         if self._rag is not None:
@@ -184,17 +185,6 @@ class LightRAGEngine:
                 max_parallel_insert=2,
             )
 
-            # 初始化存储（必须在首次使用前调，否则 async_search 报 _storage_lock is None）
-            try:
-                import asyncio
-                loop = asyncio.get_running_loop()
-            except RuntimeError:
-                loop = None
-            if loop and loop.is_running():
-                asyncio.run_coroutine_threadsafe(self._rag.initialize_storages(), loop).result()
-            else:
-                asyncio.run(self._rag.initialize_storages())
-
             self._QueryParam = QueryParam
             self._ready = True
             logger.info(f"LightRAG 初始化成功 (provider={self.cfg.llm_provider}, model={self.cfg.llm_model})")
@@ -205,11 +195,14 @@ class LightRAGEngine:
             logger.error(f"LightRAG 初始化失败: {e}")
 
     async def _init_storages_async(self):
-        """异步初始化 LightRAG 存储（在 FastAPI 启动时调用）"""
+        """异步初始化 LightRAG 存储（懒加载，首次 async_search 时自动调）"""
+        if self._storages_initialized:
+            return True
         if not self._ready or self._rag is None:
             return False
         try:
             await self._rag.initialize_storages()
+            self._storages_initialized = True
             logger.info("LightRAG 存储初始化完成")
             return True
         except Exception as e:
@@ -217,6 +210,11 @@ class LightRAGEngine:
             self._error = str(e)
             logger.error(f"LightRAG 存储初始化失败: {e}")
             return False
+
+    async def _ensure_storages_async(self):
+        """确保存储已初始化，async_search 入口调用"""
+        if not self._storages_initialized:
+            await self._init_storages_async()
 
     def _resolve_api_key(self) -> str:
         key = self.cfg.deepseek_api_key
@@ -269,6 +267,9 @@ class LightRAGEngine:
         """异步搜索（从 async MCP handler 中直接 await）"""
         if not self.is_available():
             return {"ok": False, "message": self._error or "LightRAG 不可用", "entities": [], "relationships": [], "chunks": []}
+        await self._ensure_storages_async()
+        if not self._ready:
+            return {"ok": False, "message": self._error or "存储初始化失败", "entities": [], "relationships": [], "chunks": []}
         try:
             param = self._QueryParam(
                 mode=self.cfg.lightrag_mode,

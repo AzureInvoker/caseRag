@@ -184,6 +184,17 @@ class LightRAGEngine:
                 max_parallel_insert=2,
             )
 
+            # 初始化存储（必须在首次使用前调，否则 async_search 报 _storage_lock is None）
+            try:
+                import asyncio
+                loop = asyncio.get_running_loop()
+            except RuntimeError:
+                loop = None
+            if loop and loop.is_running():
+                asyncio.run_coroutine_threadsafe(self._rag.initialize_storages(), loop).result()
+            else:
+                asyncio.run(self._rag.initialize_storages())
+
             self._QueryParam = QueryParam
             self._ready = True
             logger.info(f"LightRAG 初始化成功 (provider={self.cfg.llm_provider}, model={self.cfg.llm_model})")

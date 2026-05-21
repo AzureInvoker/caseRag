@@ -4,10 +4,29 @@ cd "$(dirname "$0")"
 case "${1:-help}" in
   start)
     echo "🚀 启动 API..."
+    # 先停旧的（如果有）
+    if [ -f /tmp/testcase-rag.pid ]; then
+      OLD_PID=$(cat /tmp/testcase-rag.pid)
+      if kill -0 "$OLD_PID" 2>/dev/null; then
+        echo "检测到旧进程 PID=$OLD_PID，先停止..."
+        kill "$OLD_PID" 2>/dev/null
+        sleep 1
+      fi
+    fi
     nohup uv run uvicorn server.api:app --host 0.0.0.0 --port 8765 > /tmp/testcase-rag.log 2>&1 &
     PID=$!
     echo "$PID" > /tmp/testcase-rag.pid
-    echo "PID: $PID"
+    # 等待服务就绪（最多15s）
+    for i in $(seq 1 15); do
+      if curl -s http://localhost:8765/api/v1/health > /dev/null 2>&1; then
+        echo "✅ 启动成功！（PID: $PID，耗时 ${i}s）"
+        exit 0
+      fi
+      sleep 1
+    done
+    # 超时
+    echo "❌ 启动失败（15s内未就绪），请查看日志：tail /tmp/testcase-rag.log"
+    exit 1
     ;;
   stop)
     echo "🛑 停止 API..."

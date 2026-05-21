@@ -93,7 +93,7 @@ async def _async_agentic_search(args: dict) -> dict:
     if not query:
         return {"content": [{"type": "text", "text": "请提供搜索关键词"}]}
     n_results = min(int(args.get("n_results", 5)), 20)
-    result = search_router.search(query=query, n_results=n_results, module=args.get("module"), priority=args.get("priority"), category=args.get("category"), mode="auto")
+    result = await search_router.async_search(query=query, n_results=n_results, module=args.get("module"), priority=args.get("priority"), category=args.get("category"), mode="auto")
     text = f"## 🔍 自适应检索「{query}」\n\n模式: {result['mode']}\n\n"
     cr = result.get("results", [])
     if cr:
@@ -347,7 +347,7 @@ def _mcp_handle(name: str, args: dict) -> dict:
         if not query:
             return {"content": [{"type": "text", "text": "请提供搜索关键词"}]}
         n_results = min(int(args.get("n_results", 5)), 20)
-        result = search_router.search(
+        result = await search_router.async_search(
             query=query,
             n_results=n_results,
             module=args.get("module"),

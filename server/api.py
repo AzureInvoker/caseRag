@@ -417,7 +417,7 @@ def _normalize_args(raw) -> dict:
     return {}
 
 
-def _mcp_handle_tc_add(args: dict) -> dict:
+async def _mcp_handle_tc_add(args: dict) -> dict:
     """处理 tc_add：添加单条测试用例（自动清洗）"""
     try:
         tc = _make_tc(args)
@@ -427,7 +427,7 @@ def _mcp_handle_tc_add(args: dict) -> dict:
     engine.add(tc)
     # 同步到 LightRAG 图谱
     if lightrag_engine.is_available():
-        lightrag_engine.insert([tc.get_embedding_text()], ids=[tc.id])
+        await lightrag_engine.async_insert([tc.get_embedding_text()], ids=[tc.id])
     return {
         "content": [{
             "type": "text",
@@ -450,7 +450,7 @@ def _mcp_handle_tc_add(args: dict) -> dict:
     }
 
 
-def _mcp_handle_tc_add_batch(args: dict) -> dict:
+async def _mcp_handle_tc_add_batch(args: dict) -> dict:
     """处理 tc_add_batch：批量添加测试用例（自动清洗每条）"""
     raw_cases = args.get("cases", [])
     if not isinstance(raw_cases, list) or not raw_cases:
@@ -474,7 +474,7 @@ def _mcp_handle_tc_add_batch(args: dict) -> dict:
     if added and lightrag_engine.is_available():
         texts = [tc.get_embedding_text() for tc in added]
         ids = [tc.id for tc in added]
-        lightrag_engine.insert(texts, ids=ids)
+        await lightrag_engine.async_insert(texts, ids=ids)
 
     summary = f"✅ 成功添加 {len(added)} 条"
     if errors:
@@ -815,9 +815,9 @@ async def mcp_message(msg: MCPMessage, request: Request, session_id: str = Query
         elif tool_name == "tc_graph_status":
             result = await _async_graph_status()
         elif tool_name == "tc_add":
-            result = _mcp_handle_tc_add(tool_args)
+            result = await _mcp_handle_tc_add(tool_args)
         elif tool_name == "tc_add_batch":
-            result = _mcp_handle_tc_add_batch(tool_args)
+            result = await _mcp_handle_tc_add_batch(tool_args)
         else:
             result = _mcp_handle(tool_name, tool_args)
 

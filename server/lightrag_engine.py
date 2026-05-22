@@ -237,6 +237,20 @@ class LightRAGEngine:
         self._lazy_init()
         return self._ready
 
+    async def async_insert(self, texts: list[str], ids: list[str] = None) -> dict:
+        """异步插入（从 async MCP handler 中直接 await）"""
+        if not self.is_available():
+            return {"ok": False, "message": self._error or "LightRAG 不可用"}
+        await self._ensure_storages_async()
+        if not self._ready:
+            return {"ok": False, "message": self._error or "存储初始化失败"}
+        try:
+            track_id = await self._rag.ainsert(texts, ids=ids)
+            return {"ok": True, "message": f"成功插入 {len(texts)} 条", "track_id": track_id}
+        except Exception as e:
+            logger.error(f"LightRAG async_insert 失败: {e}")
+            return {"ok": False, "message": str(e)}
+
     def insert(self, texts: list[str], ids: list[str] = None) -> dict:
         if not self.is_available():
             return {"ok": False, "message": self._error or "LightRAG 不可用"}
